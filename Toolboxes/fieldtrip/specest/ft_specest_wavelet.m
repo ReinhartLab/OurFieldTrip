@@ -55,6 +55,9 @@ padtype   = ft_getopt(varargin, 'padtype', 'zero');
 polyorder = ft_getopt(varargin, 'polyorder', 0);
 fbopt     = ft_getopt(varargin, 'feedback');
 verbose   = ft_getopt(varargin, 'verbose', true);
+scc   = ft_getopt(varargin, 'scc', false);
+
+
 
 if isempty(fbopt),
   fbopt.i = 1;
@@ -175,8 +178,12 @@ for ifreqoi = 1:nfreqoi
   % create wavelet and fft it
   wavelet = complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer));
   wltspctrm{ifreqoi} = complex(zeros(1,endnsample));
-  wltspctrm{ifreqoi} = fft(wavelet,[],1)';
   
+  if scc
+  wltspctrm{ifreqoi} = gpuArray(fft(wavelet,[],1)'); 
+  else
+  wltspctrm{ifreqoi} = fft(wavelet,[],1)';
+  end
   
   %%%% debug plotting
   %   figure('name',['wavelet @ ' num2str(freqoi(ifreqoi)) 'Hz' ],'NumberTitle','off');

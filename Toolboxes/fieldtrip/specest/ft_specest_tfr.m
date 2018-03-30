@@ -52,6 +52,8 @@ pad       = ft_getopt(varargin, 'pad');
 polyorder = ft_getopt(varargin, 'polyorder', 0);
 fbopt     = ft_getopt(varargin, 'feedback');
 verbose   = ft_getopt(varargin, 'verbose', true);
+scc   = ft_getopt(varargin, 'scc', false);
+
 
 if isempty(fbopt),
   fbopt.i = 1;
@@ -134,7 +136,7 @@ if isnumeric(timeoi) % if input is a vector
 elseif strcmp(timeoi,'all') % if input was 'all'
   timeboi  = 1:length(time);
   ntimeboi = length(timeboi);
-  timeoi   = time;
+  timeoi  f = time;
 end
 
 % throw a warning if input timeoi is different from output timeoi

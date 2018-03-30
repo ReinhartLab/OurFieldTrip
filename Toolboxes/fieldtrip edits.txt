@@ -31,3 +31,20 @@ changed line 159 to "if isequal(current_argin, previous_argin) || ~isempty(mask)
   % convert the mask into a binary image
   maskimage = zeros(gridscale);%false(gridscale);
 "
+
+3/30/18 
+
+Added SCC capabilities to ft_freqanalysis
+line 230 - 238 
+"if isfield(cfg,'scc')
+    if cfg.scc == 1
+       scc = 1 ;
+    else
+        scc = 0;
+    end
+else
+    scc = 0;
+end
+"
+
+all ft_specest functions also edited to have gpuarray(fft)

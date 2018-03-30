@@ -65,6 +65,7 @@ fbopt     = ft_getopt(varargin, 'feedback');
 verbose   = ft_getopt(varargin, 'verbose', true);
 polyorder = ft_getopt(varargin, 'polyorder', 0);
 tapopt    = ft_getopt(varargin, 'taperopt');
+scc   = ft_getopt(varargin, 'scc', false);
 
 if isempty(fbopt),
   fbopt.i = 1;
@@ -254,7 +255,13 @@ else
         sinwav  = horzcat(prezero, tap(itap,:) .* sin(anglein)', postzero);
         wavelet = complex(coswav, sinwav);
         % store the fft of the complex wavelet
+        
+        if scc
+        wltspctrm{ifreqoi}(itap,:) = gpuAraay(fft(wavelet,[],2));    
+        else
+        
         wltspctrm{ifreqoi}(itap,:) = fft(wavelet,[],2);
+        end
         
         %       % debug plotting
         %       figure('name',['taper #' num2str(itap) ' @ ' num2str(freqoi(ifreqoi)) 'Hz' ],'NumberTitle','off');

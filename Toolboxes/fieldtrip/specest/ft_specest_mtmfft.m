@@ -59,6 +59,7 @@ fbopt     = ft_getopt(varargin, 'feedback');
 verbose   = ft_getopt(varargin, 'verbose', true);
 polyorder = ft_getopt(varargin, 'polyorder', 0);
 tapopt    = ft_getopt(varargin, 'taperopt');
+scc   = ft_getopt(varargin, 'scc', false);
 
 if isempty(fbopt),
   fbopt.i = 1;
@@ -242,7 +243,13 @@ if ~(strcmp(taper,'dpss') && numel(tapsmofrq)>1) % ariable number of slepian tap
   spectrum = cell(ntaper(1),1);
   
   for itap = 1:ntaper(1)
+      
+      if scc
+     dum = gpuArray(fft(ft_preproc_padding(bsxfun(@times,dat,tap(itap,:)), padtype, 0, postpad),[], 2));    
+      else
     dum = fft(ft_preproc_padding(bsxfun(@times,dat,tap(itap,:)), padtype, 0, postpad),[], 2);
+      end
+    
     dum = dum(:,freqboi);
     % phase-shift according to above angles
     if timedelay ~= 0
