@@ -530,11 +530,11 @@ for itrial = 1:ntrials
       end
 
     case 'mtmfft'
-      [spectrum,ntaper,foi] = ft_specest_mtmfft(dat, time, 'taper', cfg.taper, options{:}, 'feedback', fbopt,scc);
+      [spectrum,ntaper,foi] = ft_specest_mtmfft(dat, time, 'taper', cfg.taper, options{:}, 'feedback', fbopt,'scc',scc);
       hastime = false;
 
     case 'wavelet'
-      [spectrum,foi,toi] = ft_specest_wavelet(dat, time, 'timeoi', cfg.toi, 'width', cfg.width, 'gwidth', cfg.gwidth,options{:}, 'feedback', fbopt,scc);
+      [spectrum,foi,toi] = ft_specest_wavelet(dat, time, 'timeoi', cfg.toi, 'width', cfg.width, 'gwidth', cfg.gwidth,options{:}, 'feedback', fbopt,'scc',scc);
 
       % the following variable is created to keep track of the number of
       % trials per time bin and is needed for proper normalization if
@@ -548,7 +548,7 @@ for itrial = 1:ntrials
       spectrum = reshape(spectrum,[1 nchan numel(foi) numel(toi)]);
 
     case 'tfr'
-      [spectrum,foi,toi] = ft_specest_tfr(dat, time, 'timeoi', cfg.toi, 'width', cfg.width, 'gwidth', cfg.gwidth,options{:}, 'feedback', fbopt,scc);
+      [spectrum,foi,toi] = ft_specest_tfr(dat, time, 'timeoi', cfg.toi, 'width', cfg.width, 'gwidth', cfg.gwidth,options{:}, 'feedback', fbopt,'scc',scc);
 
       % the following variable is created to keep track of the number of
       % trials per time bin and is needed for proper normalization if
