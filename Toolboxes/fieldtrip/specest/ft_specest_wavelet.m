@@ -176,13 +176,15 @@ for ifreqoi = 1:nfreqoi
   ind  = (-(acttapnumsmp-1)/2 : (acttapnumsmp-1)/2)'   .*  ((2.*pi./fsample) .* freqoi(ifreqoi));
   
   % create wavelet and fft it
-  wavelet = complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer));
-  wltspctrm{ifreqoi} = complex(zeros(1,endnsample));
-  
+
   if scc
-  wltspctrm{ifreqoi} = gpuArray(fft(wavelet,[],1)'); 
+
+      wltspctrm{ifreqoi} = complex(zeros(1,endnsample));
+      wltspctrm{ifreqoi} = gpuArray(fft(complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer)),[],1)');
   else
-  wltspctrm{ifreqoi} = fft(wavelet,[],1)';
+      wavelet = complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer));
+      wltspctrm{ifreqoi} = complex(zeros(1,endnsample));
+      wltspctrm{ifreqoi} = fft(wavelet,[],1)';
   end
   
   %%%% debug plotting
@@ -233,9 +235,15 @@ for ifreqoi = 1:nfreqoi
   
   % compute datspectrum*wavelet, if there are reqtimeboi's that have data
   if ~isempty(reqtimeboi)
-    dum = fftshift(ifft(datspectrum .* repmat(wltspctrm{ifreqoi},[nchan 1]), [], 2),2);
-    dum = dum .* sqrt(2 ./ fsample);
-    spectrum(:,ifreqoi,reqtimeboiind) = dum(:,reqtimeboi);
+      
+      if ~scc
+          dum = fftshift(ifft(datspectrum .* repmat(wltspctrm{ifreqoi},[nchan 1]), [], 2),2);
+          dum = dum .* sqrt(2 ./ fsample);
+          spectrum(:,ifreqoi,reqtimeboiind) = dum(:,reqtimeboi);
+      else
+          dum = gpuArray([fftshift(ifft(datspectrum .* repmat(wltspctrm{ifreqoi},[nchan 1]), [], 2),2)] .* sqrt(2 ./ fsample));
+          spectrum(:,ifreqoi,reqtimeboiind) = dum(:,reqtimeboi);
+      end
   end
 end
 

@@ -52,3 +52,6 @@ all ft_specest functions also edited to have gpuarray(fft)
 4/5/18
 
 Added read_brainvision_eeg.mat to have function to preprocess faster
+
+4/6/18
+add more gpuarrays in ft_specest wavelet for better GPU compatibilities.
