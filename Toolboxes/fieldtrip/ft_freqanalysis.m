@@ -212,6 +212,7 @@ cfg.inputlock   = ft_getopt(cfg, 'inputlock',  []);  % this can be used as mutex
 cfg.outputlock  = ft_getopt(cfg, 'outputlock', []);  % this can be used as mutex when doing distributed computation
 cfg.trials      = ft_getopt(cfg, 'trials',     'all', 1);
 cfg.channel     = ft_getopt(cfg, 'channel',    'all');
+cfg.scc   = ft_getopt(varargin, 'scc', false);
 
 % check if the input data is valid for this function
 data = ft_checkdata(data, 'datatype', {'raw', 'raw+comp', 'mvar'}, 'feedback', cfg.feedback, 'hassampleinfo', 'yes');
