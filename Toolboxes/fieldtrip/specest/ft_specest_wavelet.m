@@ -168,7 +168,7 @@ end
 if numel(width) == 1
   width = ones(1,nfreqoi) * width;
 end
-wltspctrm = cell(nfreqoi,1);
+
 for ifreqoi = 1:nfreqoi
     
   str = sprintf('frequency %d (%.2f Hz)', ifreqoi,freqoi(ifreqoi));
@@ -188,13 +188,6 @@ for ifreqoi = 1:nfreqoi
   ind  = (-(acttapnumsmp-1)/2 : (acttapnumsmp-1)/2)'   .*  ((2.*pi./fsample) .* freqoi(ifreqoi));
   
   % create wavelet and fft it
-
-  if ~scc
-      wavelet = complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer));
-      wltspctrm{ifreqoi} = complex(zeros(1,endnsample));
-      wltspctrm{ifreqoi} = fft(wavelet,[],1)';
-  end
-  
  
   [st, cws] = dbstack;
   if length(st)>1 && strcmp(st(2).name, 'ft_freqanalysis') && verbose
@@ -211,8 +204,7 @@ for ifreqoi = 1:nfreqoi
   % compute datspectrum*wavelet, if there are reqtimeboi's that have data
   if ~isempty(reqtimeboi)
       if ~scc
-          dum = fftshift(ifft(datspectrum .* repmat(wltspctrm{ifreqoi},[nchan 1]), [], 2),2);
-          dum = dum .* sqrt(2 ./ fsample);
+          dum = [fftshift(ifft(datspectrum .* repmat(fft(complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer)),[],1)',[nchan 1]), [], 2),2)] .* sqrt(2 ./ fsample);
           spectrum(:,ifreqoi,reqtimeboiind) = dum(:,reqtimeboi);
       else
           dum = gather(gpuArray([fftshift(ifft(datspectrum .* repmat(fft(complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer)),[],1)',[nchan 1]), [], 2),2)] .* sqrt(2 ./ fsample)));
