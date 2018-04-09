@@ -158,8 +158,8 @@ if ~scc
     spectrum = complex(nan(nchan,nfreqoi,ntimeboi),nan(nchan,nfreqoi,ntimeboi));
     datspectrum = fft(ft_preproc_padding(dat, padtype, 0, postpad), [], 2);
 else
-    spectrum = gather(gpuArray(complex(nan(nchan,nfreqoi,ntimeboi),nan(nchan,nfreqoi,ntimeboi))));
-    datspectrum = gather(gpuArray(fft(ft_preproc_padding(dat, padtype, 0, postpad), [], 2)));
+    spectrum = complex(nan(nchan,nfreqoi,ntimeboi),nan(nchan,nfreqoi,ntimeboi));
+    datspectrum = fft(gpuArray(ft_preproc_padding(dat, padtype, 0, postpad), [], 2));
 end
 
 
