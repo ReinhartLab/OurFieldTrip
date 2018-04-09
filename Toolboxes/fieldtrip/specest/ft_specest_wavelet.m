@@ -207,7 +207,8 @@ for ifreqoi = 1:nfreqoi
           dum = [fftshift(ifft(datspectrum .* repmat(fft(complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer)),[],1)',[nchan 1]), [], 2),2)] .* sqrt(2 ./ fsample);
           spectrum(:,ifreqoi,reqtimeboiind) = dum(:,reqtimeboi);
       else
-          dum = gather(gpuArray([fftshift(ifft(datspectrum .* repmat(fft(complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer)),[],1)',[nchan 1]), [], 2),2)] .* sqrt(2 ./ fsample)));
+          wavelet = gpuArray(complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer)));
+          dum = gather([fftshift(ifft(datspectrum .* repmat(fft(wavelet,[],1)',[nchan 1]), [], 2),2)] .* sqrt(2 ./ fsample));
           spectrum(:,ifreqoi,reqtimeboiind) = dum(:,reqtimeboi);
       end
   end
