@@ -180,7 +180,6 @@ for ifreqoi = 1:nfreqoi
   A = 1/sqrt(st*sqrt(pi));
   tap = (A*exp(-toi2.^2/(2*st^2)))';
   acttapnumsmp = size(tap,1);
-  taplen(ifreqoi) = acttapnumsmp;
   ins = ceil(endnsample./2) - floor(acttapnumsmp./2);
   prezer = zeros(ins,1);
   pstzer = zeros(endnsample - ((ins-1) + acttapnumsmp)-1,1);
@@ -190,11 +189,7 @@ for ifreqoi = 1:nfreqoi
   
   % create wavelet and fft it
 
-  if scc
-
-      wltspctrm{ifreqoi} = gather(gpuArray(complex(zeros(1,endnsample))));
-      wltspctrm{ifreqoi} = gather(gpuArray(fft(complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer)),[],1)'));
-  else
+  if ~scc
       wavelet = complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer));
       wltspctrm{ifreqoi} = complex(zeros(1,endnsample));
       wltspctrm{ifreqoi} = fft(wavelet,[],1)';
@@ -210,8 +205,7 @@ for ifreqoi = 1:nfreqoi
   end
   
   % compute indices that will be used to extracted the requested fft output
-  nsamplefreqoi    = taplen(ifreqoi);
-  reqtimeboiind    = find((timeboi >=  (nsamplefreqoi ./ 2)) & (timeboi < (ndatsample - (nsamplefreqoi ./2))));
+  reqtimeboiind    = find((timeboi >=  (acttapnumsmp ./ 2)) & (timeboi < (ndatsample - (acttapnumsmp ./2))));
   reqtimeboi       = timeboi(reqtimeboiind);
   
   % compute datspectrum*wavelet, if there are reqtimeboi's that have data
@@ -221,7 +215,7 @@ for ifreqoi = 1:nfreqoi
           dum = dum .* sqrt(2 ./ fsample);
           spectrum(:,ifreqoi,reqtimeboiind) = dum(:,reqtimeboi);
       else
-          dum = gather(gpuArray([fftshift(ifft(datspectrum .* repmat(wltspctrm{ifreqoi},[nchan 1]), [], 2),2)] .* sqrt(2 ./ fsample)));
+          dum = gather(gpuArray([fftshift(ifft(datspectrum .* repmat(fft(complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer)),[],1)',[nchan 1]), [], 2),2)] .* sqrt(2 ./ fsample)));
           spectrum(:,ifreqoi,reqtimeboiind) = dum(:,reqtimeboi);
       end
   end
