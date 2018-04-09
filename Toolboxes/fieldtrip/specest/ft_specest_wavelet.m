@@ -153,6 +153,16 @@ if isnumeric(timeoiinput)
 end
 
 
+% Compute fft
+if ~scc
+    spectrum = complex(nan(nchan,nfreqoi,ntimeboi),nan(nchan,nfreqoi,ntimeboi));
+    datspectrum = fft(ft_preproc_padding(dat, padtype, 0, postpad), [], 2);
+else
+    spectrum = gather(gpuArray(complex(nan(nchan,nfreqoi,ntimeboi),nan(nchan,nfreqoi,ntimeboi))));
+    datspectrum = gather(gpuArray(fft(ft_preproc_padding(dat, padtype, 0, postpad), [], 2)));
+end
+
+
 % Creating wavelets
 % expand width to array if constant width
 if numel(width) == 1
@@ -160,6 +170,9 @@ if numel(width) == 1
 end
 wltspctrm = cell(nfreqoi,1);
 for ifreqoi = 1:nfreqoi
+    
+  str = sprintf('frequency %d (%.2f Hz)', ifreqoi,freqoi(ifreqoi));
+    
   dt = 1/fsample;
   sf = freqoi(ifreqoi) / width(ifreqoi);
   st = 1/(2*pi*sf);
@@ -179,47 +192,15 @@ for ifreqoi = 1:nfreqoi
 
   if scc
 
-      wltspctrm{ifreqoi} = complex(zeros(1,endnsample));
-      wltspctrm{ifreqoi} = gpuArray(fft(complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer)),[],1)');
+      wltspctrm{ifreqoi} = gather(gpuArray(complex(zeros(1,endnsample))));
+      wltspctrm{ifreqoi} = gather(gpuArray(fft(complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer)),[],1)'));
   else
       wavelet = complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer));
       wltspctrm{ifreqoi} = complex(zeros(1,endnsample));
       wltspctrm{ifreqoi} = fft(wavelet,[],1)';
   end
   
-  %%%% debug plotting
-  %   figure('name',['wavelet @ ' num2str(freqoi(ifreqoi)) 'Hz' ],'NumberTitle','off');
-  %   subplot(2,1,1);
-  %   hold on;
-  %   plot(real(wavelet));
-  %   plot(imag(wavelet),'color','r');
-  %   legend('real','imag');
-  %   tline = length(wavelet)/2;
-  %   if mod(tline,2)==0
-  %     line([tline tline],[-max(abs(wavelet)) max(abs(wavelet))],'color','g','linestyle','--')
-  %   else
-  %     line([ceil(tline) ceil(tline)],[-max(abs(wavelet)) max(abs(wavelet))],'color','g','linestyle','--');
-  %     line([floor(tline) floor(tline)],[-max(abs(wavelet)) max(abs(wavelet))],'color','g','linestyle','--');
-  %   end;
-  %   subplot(2,1,2);
-  %   plot(angle(wavelet),'color','g');
-  %   if mod(tline,2)==0,
-  %     line([tline tline],[-pi pi],'color','r','linestyle','--')
-  %   else
-  %     line([ceil(tline) ceil(tline)],[-pi pi],'color','r','linestyle','--')
-  %     line([floor(tline) floor(tline)],[-pi pi],'color','r','linestyle','--')
-  %   end
-  %%%% debug plotting
-  
-end
-
-
-% Compute fft
-spectrum = complex(nan(nchan,nfreqoi,ntimeboi),nan(nchan,nfreqoi,ntimeboi));
-datspectrum = fft(ft_preproc_padding(dat, padtype, 0, postpad), [], 2);
-for ifreqoi = 1:nfreqoi
-  str = sprintf('frequency %d (%.2f Hz)', ifreqoi,freqoi(ifreqoi));
-  
+ 
   [st, cws] = dbstack;
   if length(st)>1 && strcmp(st(2).name, 'ft_freqanalysis') && verbose
     % specest_convol has been called by ft_freqanalysis, meaning that ft_progress has been initialised
@@ -235,13 +216,12 @@ for ifreqoi = 1:nfreqoi
   
   % compute datspectrum*wavelet, if there are reqtimeboi's that have data
   if ~isempty(reqtimeboi)
-      
       if ~scc
           dum = fftshift(ifft(datspectrum .* repmat(wltspctrm{ifreqoi},[nchan 1]), [], 2),2);
           dum = dum .* sqrt(2 ./ fsample);
           spectrum(:,ifreqoi,reqtimeboiind) = dum(:,reqtimeboi);
       else
-          dum = gpuArray([fftshift(ifft(datspectrum .* repmat(wltspctrm{ifreqoi},[nchan 1]), [], 2),2)] .* sqrt(2 ./ fsample));
+          dum = gather(gpuArray([fftshift(ifft(datspectrum .* repmat(wltspctrm{ifreqoi},[nchan 1]), [], 2),2)] .* sqrt(2 ./ fsample)));
           spectrum(:,ifreqoi,reqtimeboiind) = dum(:,reqtimeboi);
       end
   end
