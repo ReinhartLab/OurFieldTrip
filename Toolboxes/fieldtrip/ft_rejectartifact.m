@@ -424,12 +424,14 @@ if strcmp(cfg.artfctdef.reject, 'partial') || strcmp(cfg.artfctdef.reject, 'comp
     if all(not(rejecttrial))
       % the whole trial is good
       trialok = [trialok; trl(trial,:)];
+      cfg.saminfo(trial) = 1;
     elseif all(rejecttrial)
       % the whole trial is bad
       count_complete_reject = count_complete_reject + 1;
       trlRemovedInd = [trlRemovedInd trial];
+      cfg.saminfo(trial) = 0;
     elseif any(rejecttrial) && strcmp(cfg.artfctdef.reject, 'complete')
-
+      cfg.saminfo(trial) = 0;
       % some part of the trial is bad, check if within crittoilim?
       if (checkCritToi)
         critInd = (data.time{trial} >= cfg.artfctdef.crittoilim(trial,1) ...
@@ -449,6 +451,7 @@ if strcmp(cfg.artfctdef.reject, 'partial') || strcmp(cfg.artfctdef.reject, 'comp
       end
 
     elseif any(rejecttrial) && strcmp(cfg.artfctdef.reject, 'partial')
+      cfg.saminfo(trial) = 0;
       % some part of the trial is bad, reject only the bad part
       trialnew = [];
       rejecttrial = [0 not(rejecttrial) 0];
@@ -468,6 +471,7 @@ if strcmp(cfg.artfctdef.reject, 'partial') || strcmp(cfg.artfctdef.reject, 'comp
       trlPartiallyRemovedInd = [trlPartiallyRemovedInd trial];
 
     elseif any(rejecttrial) && strcmp(cfg.artfctdef.reject, 'nan')
+      cfg.saminfo(trial) = 0;
       % Some part of the trial is bad, replace bad part with nans
       data.trial{trial}(:,rejecttrial) = nan;
       count_nan = count_nan + 1;
@@ -512,6 +516,7 @@ else
     if isfield(data, 'offset')
       data = rmfield(data, 'offset');
     end
+    data.saminfo = cfg.saminfo;
   end
 end;
 
