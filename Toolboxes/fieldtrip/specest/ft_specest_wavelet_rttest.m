@@ -1,4 +1,4 @@
-function [spectrum,freqoi,timeoi] = ft_specest_wavelet(dat, time, varargin)
+function [spectrum] = ft_specest_wavelet_rttest(cfg,data, varargin)
 
 % FT_SPECEST_WAVELET performs time-frequency analysis on any time series trial data
 % using the 'wavelet method' based on Morlet wavelets, doing convolution in the time
@@ -45,27 +45,48 @@ function [spectrum,freqoi,timeoi] = ft_specest_wavelet(dat, time, varargin)
 %
 % $Id$
 
-% get the optional input arguments
-freqoi    = ft_getopt(varargin, 'freqoi', 'all');
-timeoi    = ft_getopt(varargin, 'timeoi', 'all');
-width     = ft_getopt(varargin, 'width', 7);
-gwidth    = ft_getopt(varargin, 'gwidth', 3);
-pad       = ft_getopt(varargin, 'pad');
-padtype   = ft_getopt(varargin, 'padtype', 'zero');
-polyorder = ft_getopt(varargin, 'polyorder', 0);
-fbopt     = ft_getopt(varargin, 'feedback');
-verbose   = ft_getopt(varargin, 'verbose', true);
-scc   = ft_getopt(varargin, 'scc', false);
+dat = cell2mat(permute(data.trial,[1 3 2]));
+time = data.time{1};
 
-
-
-if isempty(fbopt),
-  fbopt.i = 1;
-  fbopt.n = 1;
+ntrials = numel(data.trial);
+trllength = zeros(1, ntrials);
+for itrial = 1:ntrials
+  trllength(itrial) = size(data.trial{itrial}, 2);
+end
+if strcmp(cfg.pad, 'maxperlen')
+  padding = max(trllength);
+  pad = padding/data.fsample;
+elseif strcmp(cfg.pad, 'nextpow2')
+  padding = 2^nextpow2(max(trllength));
+  pad = padding/data.fsample;
+else
+  padding = cfg.pad*data.fsample;
+  if padding<max(trllength)
+    error('the specified padding is too short');
+  end
 end
 
+freqoi       = ft_getopt(cfg, 'foi',       []);
+fboi   = round(freqoi .* pad) + 1;
+freqoi   = (fboi-1) ./ pad; % boi - 1 because 0 Hz is included in fourier output
+
+width  = ft_getopt(cfg, 'width',  7);
+gwidth = ft_getopt(cfg, 'gwidth', 3);
+scc   = ft_getopt(cfg, 'scc', false);
+
+
+% get the optional input arguments
+
+timeoi    = ft_getopt(cfg, 'toi', 'all');
+
+padtype   = ft_getopt(cfg, 'padtype',   'zero');
+polyorder     = ft_getopt(cfg, 'polyremoval', 0);
+
+
+
+
 % Set n's
-[nchan,ndatsample] = size(dat);
+[nchan,ndatsample,ntrials] = size(dat);
 
 % This does not work on integer data
 typ = class(dat);
@@ -142,21 +163,22 @@ elseif strcmp(timeoi,'all') % if input was 'all'
 end
 
 % throw a warning if input timeoi is different from output timeoi
-if isnumeric(timeoiinput)
-  if numel(timeoiinput) ~= numel(timeoi) % timeoi will not contain double time-bins when requested
-    ft_warning('output time-bins are different from input time-bins, multiples of the same bin were requested but not given');
-  else
-    if any(abs(timeoiinput-timeoi) >= eps*1e6)
-      ft_warning('output time-bins are different from input time-bins');
-    end
-  end
-end
+% if isnumeric(timeoiinput)
+%   if numel(timeoiinput) ~= numel(timeoi) % timeoi will not contain double time-bins when requested
+%     ft_warning('output time-bins are different from input time-bins, multiples of the same bin were requested but not given');
+%   else
+%     if any(abs(timeoiinput-timeoi) >= eps*1e6)
+%       ft_warning('output time-bins are different from input time-bins');
+%     end
+%   end
+% end
 
 
 % Compute fft
 if ~scc
-    spectrum = complex(nan(nchan,nfreqoi,ntimeboi),nan(nchan,nfreqoi,ntimeboi));
-    datspectrum = fft(ft_preproc_padding(dat, padtype, 0, postpad), [], 2);
+    spectrum = complex(nan(nchan,nfreqoi,ntimeboi,ntrials),nan(nchan,nfreqoi,ntimeboi,ntrials));
+    dat(:,end+1:end+postpad,:) = zeros([nchan postpad ntrials]);
+    datspectrum = fft(dat, [], 2);
 else
     spectrum = complex(nan(nchan,nfreqoi,ntimeboi),nan(nchan,nfreqoi,ntimeboi));
     datspectrum = fft(gpuArray(ft_preproc_padding(dat, padtype, 0, postpad)), [], 2);
@@ -169,16 +191,17 @@ if numel(width) == 1
   width = ones(1,nfreqoi) * width;
 end
 
+  dt = 1/fsample;
+  sf = freqoi ./ width;
+  st = 1 ./(2*pi*sf);
+  A = 1 ./sqrt(st*sqrt(pi));
 for ifreqoi = 1:nfreqoi
     
-  str = sprintf('frequency %d (%.2f Hz)', ifreqoi,freqoi(ifreqoi));
-    
-  dt = 1/fsample;
-  sf = freqoi(ifreqoi) / width(ifreqoi);
-  st = 1/(2*pi*sf);
-  toi2 = -gwidth*st:dt:gwidth*st;
-  A = 1/sqrt(st*sqrt(pi));
-  tap = (A*exp(-toi2.^2/(2*st^2)))';
+%   str = sprintf('frequency %d (%.2f Hz)', ifreqoi,freqoi(ifreqoi));
+%     
+
+  toi2 = -gwidth*st(ifreqoi):dt:gwidth*st(ifreqoi);
+  tap = (A(ifreqoi) *exp(-toi2.^2/(2*st(ifreqoi)^2)))';
   acttapnumsmp = size(tap,1);
   ins = ceil(endnsample./2) - floor(acttapnumsmp./2);
   prezer = zeros(ins,1);
@@ -196,7 +219,7 @@ for ifreqoi = 1:nfreqoi
 %   elseif verbose
 %     fprintf([str, '\n']);
 %   end
-%   
+  
   % compute indices that will be used to extracted the requested fft output
   reqtimeboiind    = find((timeboi >=  (acttapnumsmp ./ 2)) & (timeboi < (ndatsample - (acttapnumsmp ./2))));
   reqtimeboi       = timeboi(reqtimeboiind);
@@ -205,11 +228,18 @@ for ifreqoi = 1:nfreqoi
   if ~isempty(reqtimeboi)
       if ~scc
           dum = [fftshift(ifft(datspectrum .* repmat(fft(complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer)),[],1)',[nchan 1]), [], 2),2)] .* sqrt(2 ./ fsample);
-          spectrum(:,ifreqoi,reqtimeboiind) = dum(:,reqtimeboi);
+          spectrum(:,ifreqoi,reqtimeboiind,:) = dum(:,reqtimeboi,:);
       else
           dum = gather([fftshift(ifft(datspectrum .* repmat(fft(gpuArray(complex(vertcat(prezer,tap.*cos(ind),pstzer), vertcat(prezer,tap.*sin(ind),pstzer))),[],1)',[nchan 1]), [], 2),2)] .* sqrt(2 ./ fsample));
-          spectrum(:,ifreqoi,reqtimeboiind) = dum(:,reqtimeboi);
+          spectrum(:,ifreqoi,reqtimeboiind,:) = dum(:,reqtimeboim,:);
       end
   end
 end
 
+spectrum = permute(spectrum,[4 1 2 3]);
+cumtapcnt = ones([1 nfreqoi]);
+
+freq        = [];
+freq.label  = data.label;
+freq.dimord = dimord;
+freq.freq   = foi;
