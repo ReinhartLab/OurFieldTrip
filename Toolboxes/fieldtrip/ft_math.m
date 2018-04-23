@@ -107,10 +107,10 @@ if ft_abort
 end
 
 type = ft_datatype(varargin{1});
-for i=1:length(varargin)
-  % check if the input data is valid for this function, that all data types are equal and update old data structures
-  varargin{i} = ft_checkdata(varargin{i}, 'datatype', type);
-end
+% for i=1:length(varargin)
+%   % check if the input data is valid for this function, that all data types are equal and update old data structures
+%   varargin{i} = ft_checkdata(varargin{i}, 'datatype', type);
+% end
 
 % ensure that the required options are present
 cfg = ft_checkconfig(cfg, 'required', {'operation', 'parameter'});
@@ -140,11 +140,11 @@ end
 % the actual computation is done in the middle part
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-for p=1:length(cfg.parameter)
-  if ~issubfield(varargin{1}, cfg.parameter{p})
-    error('the requested parameter is not present in the data');
-  end
-end
+% for p=1:length(cfg.parameter)
+%   if ~issubfield(varargin{1}, cfg.parameter{p})
+%     error('the requested parameter is not present in the data');
+%   end
+% end
 
 % ensure that the data in all inputs has the same channels, time-axis, etc.
 tmpcfg = [];
