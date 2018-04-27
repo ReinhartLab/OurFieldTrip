@@ -354,9 +354,9 @@ cfg.polyremoval      = ft_getopt(cfg, 'polyremoval', 0);
 if strcmp(cfg.output, 'fourier')
   cfg.keeptrials = ft_getopt(cfg, 'keeptrials', 'yes');
   cfg.keeptapers = ft_getopt(cfg, 'keeptapers', 'yes');
-  if strcmp(cfg.keeptrials, 'no') || strcmp(cfg.keeptapers, 'no'),
-    error('cfg.output = ''fourier'' requires cfg.keeptrials = ''yes'' and cfg.keeptapers = ''yes''');
-  end
+%   if strcmp(cfg.keeptrials, 'no') || strcmp(cfg.keeptapers, 'no'),
+%     error('cfg.output = ''fourier'' requires cfg.keeptrials = ''yes'' and cfg.keeptapers = ''yes''');
+%   end
 else
   cfg.keeptrials = ft_getopt(cfg, 'keeptrials', 'no');
   cfg.keeptapers = ft_getopt(cfg, 'keeptapers', 'no');
@@ -511,7 +511,7 @@ for itrial = 1:ntrials
 
     case 'mtmconvol'
       [spectrum_mtmconvol,ntaper,foi,toi] = ft_specest_mtmconvol(dat, time, 'timeoi', cfg.toi, 'timwin', cfg.t_ftimwin, 'taper', ...
-        cfg.taper, options{:}, 'dimord', 'chan_time_freqtap', 'feedback', fbopt,scc);
+        cfg.taper, options{:}, 'dimord', 'chan_time_freqtap', 'feedback', fbopt,'scc',scc);
 
       % the following variable is created to keep track of the number of
       % trials per time bin and is needed for proper normalization if
