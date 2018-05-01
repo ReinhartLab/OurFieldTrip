@@ -402,23 +402,19 @@ for p = 1:length(cfg.parameter)
         % assume that the operation is descibed as a string, e.g. (x1-x2)/(x1+x2)
 
         % ensure that all input arguments are being used
-        for i=1:length(varargin)
-          assert(~isempty(regexp(cfg.operation, sprintf('x%i', i), 'once')), 'not all input arguments are assigned in the operation')
-        end
+%         for i=1:length(varargin)
+%           assert(~isempty(regexp(cfg.operation, sprintf('x%i', i), 'once')), 'not all input arguments are assigned in the operation')
+%         end
 
         arginstr = sprintf('x%i,', 1:length(varargin));
         arginstr = arginstr(1:end-1); % remove the trailing ','
-        eval(sprintf('operation = @(%s) %s;', arginstr, cfg.operation));
+        eval(sprintf('operation = @(x) %s;',regexprep( cfg.operation,'[1-9]','{$0}')));
 
         if ~iscell(varargin{1}.(cfg.parameter{p}))
           % gather x1, x2, ... into a cell-array
           arginval = eval(sprintf('{%s}', arginstr));
-          eval(sprintf('operation = @(%s) %s;', arginstr, cfg.operation));
-          if numel(s)<=1
-            y = arrayfun(operation, arginval{:});
-          else
-            y = feval(operation, arginval{:});
-          end
+          y = feval(operation, arginval);
+
         else
           y = cell(size(x1));
           % do the same thing, but now for each element of the cell array
