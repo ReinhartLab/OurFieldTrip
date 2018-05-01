@@ -402,9 +402,9 @@ for p = 1:length(cfg.parameter)
         % assume that the operation is descibed as a string, e.g. (x1-x2)/(x1+x2)
 
         % ensure that all input arguments are being used
-        for i=1:length(varargin)
-          assert(~isempty(regexp(cfg.operation, sprintf('x%i', i), 'once')), 'not all input arguments are assigned in the operation')
-        end
+%         for i=1:length(varargin)
+%           assert(~isempty(regexp(cfg.operation, sprintf('x%i', i), 'once')), 'not all input arguments are assigned in the operation')
+%         end
 
         arginstr = sprintf('x%i,', 1:length(varargin));
         arginstr = arginstr(1:end-1); % remove the trailing ','
