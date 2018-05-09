@@ -493,11 +493,8 @@ end
 % Make the figure interactive:
 if strcmp(cfg.interactive, 'yes')
   % first, attach data to the figure with the current axis handle as a name
-  dataname = fixname(num2str(double(gca)));
-  setappdata(gcf,dataname,data);
-  
-  set(gca,'UserData',cfg);
-  set(gcf, 'ButtonDownFcn',{@singleaxis,dataname,data});
+  set(gca,'UserData',{cfg,data,{@ft_select_range, 'multiple', false, 'callback', @select_topoplotTFR, 'event', 'WindowButtonUpFcn'}});
+  set(gca, 'ButtonDownFcn',@singleaxis);
  
   %   set(gcf, 'WindowButtonUpFcn',     {@ft_select_range, 'multiple', false, 'callback', {@select_topoplotTFR, cfg, data}, 'event', 'WindowButtonUpFcn'});
   %   set(gcf, 'WindowButtonDownFcn',   {@ft_select_range, 'multiple', false, 'callback', {@select_topoplotTFR, cfg, data}, 'event', 'WindowButtonDownFcn'});
@@ -566,12 +563,13 @@ if numel(findobj(gcf, 'type', 'axes', '-not', 'tag', 'ft-colorbar')) <= 1
   uimenu(ftmenu, 'Label', 'About',  'Callback', @menu_about);
 end
 
-function singleaxis(~,~,dataname,data)
+function singleaxis(~,~)
 
-setappdata(gcf,dataname,data);
-set(gcf, 'WindowButtonUpFcn',     {@ft_select_range, 'multiple', false, 'callback', {@select_topoplotTFR}, 'event', 'WindowButtonUpFcn'});
-set(gcf, 'WindowButtonDownFcn',   {@ft_select_range, 'multiple', false, 'callback', {@select_topoplotTFR}, 'event', 'WindowButtonDownFcn'});
-set(gcf, 'WindowButtonMotionFcn', {@ft_select_range, 'multiple', false, 'callback', {@select_topoplotTFR}, 'event', 'WindowButtonMotionFcn'});
+curax = get(gca,'UserData');
+
+set(gcf, 'WindowButtonUpFcn', [curax{3}, {'event','WindowButtonUpFcn'}]);
+set(gcf, 'WindowButtonDownFcn',   [curax{3},{'event', 'WindowButtonDownFcn'}]);
+set(gcf, 'WindowButtonMotionFcn', [curax{3},{ 'event', 'WindowButtonMotionFcn'}]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SUBFUNCTION which is called after selecting a time range
@@ -583,10 +581,10 @@ range = varargin{end-1};
 varargin = varargin(1:end-2); % remove range and last
 
 % get appdata belonging to current axis
-dataname = fixname(num2str(double(gca)));
-data = getappdata(gcf, dataname);
 
-cfg = get(gca,'UserData');
+curax = get(gca,'UserData');
+cfg = curax{1};
+data = curax{2};
 
 if isfield(cfg, 'inputfile')
   % the reading has already been done and varargin contains the data

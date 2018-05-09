@@ -901,11 +901,20 @@ if strcmp(cfg.interactive, 'yes')
   guidata(gcf, info);
   % attach data to the figure with the current axis handle as a name
   
-  set(gca,'UserData',cfg);
-  dataname = fixname(num2str(double(gca)));
-  set(gcf, 'ButtonDownFcn',{@singleaxis,dataname,data,varargin(1:Ndata)});
+  if any(strcmp(data.dimord, {'chan_time', 'chan_freq', 'subj_chan_time', 'rpt_chan_time', 'chan_chan_freq', 'chancmb_freq', 'rpt_chancmb_freq', 'subj_chancmb_freq'}))
+      topfun ={@ft_select_channel, 'multiple', true, 'callback', {@select_singleplotER,cfg}, 'event'};
+      
+  elseif any(strcmp(data.dimord, {'chan_freq_time', 'subj_chan_freq_time', 'rpt_chan_freq_time', 'rpttap_chan_freq_time', 'chan_chan_freq_time', 'chancmb_freq_time', 'rpt_chancmb_freq_time', 'subj_chancmb_freq_time'}))
+      topfun = {@ft_select_channel, 'multiple', true, 'callback', {@select_singleplotTFR,cfg}, 'event'};
+  else
+      warning('unsupported dimord "%s" for interactive plotting', data.dimord);
+  end
+  
+  set(gca,'UserData', {cfg,data,topfun});
+  set(gca, 'ButtonDownFcn',@singleaxis);
  
-
+  
+  
 end
 
 % set the figure window title, but only if the user has not changed it
@@ -957,22 +966,13 @@ if numel(findobj(gcf, 'type', 'axes')) <= 1
   end
 end
 
-function singleaxis(~,~,dataname,data,cfg)
+function singleaxis(~,~)
 
-  setappdata(gcf,dataname,cfg);
-  if any(strcmp(data.dimord, {'chan_time', 'chan_freq', 'subj_chan_time', 'rpt_chan_time', 'chan_chan_freq', 'chancmb_freq', 'rpt_chancmb_freq', 'subj_chancmb_freq'}))
-    set(gcf, 'WindowButtonUpFcn',     {@ft_select_channel, 'multiple', true, 'callback', {@select_singleplotER}, 'event', 'WindowButtonUpFcn'});
-    set(gcf, 'WindowButtonDownFcn',   {@ft_select_channel, 'multiple', true, 'callback', {@select_singleplotER}, 'event', 'WindowButtonDownFcn'});
-    set(gcf, 'WindowButtonMotionFcn', {@ft_select_channel, 'multiple', true, 'callback', {@select_singleplotER}, 'event', 'WindowButtonMotionFcn'});
-  elseif any(strcmp(data.dimord, {'chan_freq_time', 'subj_chan_freq_time', 'rpt_chan_freq_time', 'rpttap_chan_freq_time', 'chan_chan_freq_time', 'chancmb_freq_time', 'rpt_chancmb_freq_time', 'subj_chancmb_freq_time'}))
-    set(gcf, 'WindowButtonUpFcn',     {@ft_select_channel, 'multiple', true, 'callback', {@select_singleplotTFR}, 'event', 'WindowButtonUpFcn'});
-    set(gcf, 'WindowButtonDownFcn',   {@ft_select_channel, 'multiple', true, 'callback', {@select_singleplotTFR}, 'event', 'WindowButtonDownFcn'});
-    set(gcf, 'WindowButtonMotionFcn', {@ft_select_channel, 'multiple', true, 'callback', {@select_singleplotTFR}, 'event', 'WindowButtonMotionFcn'});
-  else
-    warning('unsupported dimord "%s" for interactive plotting', data.dimord);
-  end
+curax = get(gca,'UserData');
 
-
+set(gcf, 'WindowButtonUpFcn', [curax{3}, {'event','WindowButtonUpFcn'}]);
+set(gcf, 'WindowButtonDownFcn',   [curax{3},{'event', 'WindowButtonDownFcn'}]);
+set(gcf, 'WindowButtonMotionFcn', [curax{3},{ 'event', 'WindowButtonMotionFcn'}]);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SUBFUNCTION which is called after selecting channels in case of cfg.refchannel='gui'
@@ -1004,11 +1004,10 @@ ft_topoplotER(cfg, data);
 function select_singleplotER(label)
 if ~isempty(label)
   % get appdata belonging to current axis
-  dataname = fixname(num2str(double(gca)));
-  data = getappdata(gcf, dataname);
+  curax = get(gca,'UserData');
   
-  
-  cfg = get(gca,'UserData');
+  cfg = curax{1};
+  data = curax{2};
   
   if isfield(cfg, 'inputfile')
     % the reading has already been done and varargin contains the data
@@ -1038,10 +1037,10 @@ end
 function select_singleplotTFR(label)
 if ~isempty(label)
   % get appdata belonging to current axis
-  dataname = fixname(num2str(double(gca)));
-  data = getappdata(gcf, dataname);
+   curax = get(gca,'UserData');
   
-  cfg = get(gca,'UserData');
+  cfg = curax{1};
+  data = curax{2};
   
   if isfield(cfg, 'inputfile')
     % the reading has already been done and varargin contains the data
