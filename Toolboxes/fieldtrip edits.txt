@@ -55,3 +55,15 @@ Added read_brainvision_eeg.mat to have function to preprocess faster
 
 4/6/18
 add more gpuarrays in ft_specest wavelet for better GPU compatibilities.
+
+6/6
+fast-forwarded a few scripts from newer fieldtrip
+topoplot_common with our previous change on 3/15/18
+updated ft_warning
+added new ft_notification
+added defaultId
+updated ft_defaults
+updated ft_platform_supports
+
+6/12 
+updated ft_singleplotER/TFR
