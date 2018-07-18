@@ -189,14 +189,14 @@ for ifreqoi = 1:nfreqoi
   
   % create wavelet and fft it
  
-%   [st, cws] = dbstack;
-%   if length(st)>1 && strcmp(st(2).name, 'ft_freqanalysis') && verbose
-%     % specest_convol has been called by ft_freqanalysis, meaning that ft_progress has been initialised
-%     ft_progress(fbopt.i./fbopt.n, ['trial %d, ',str,'\n'], fbopt.i);
-%   elseif verbose
-%     fprintf([str, '\n']);
-%   end
-%   
+  [st, cws] = dbstack;
+  if length(st)>1 && strcmp(st(2).name, 'ft_freqanalysis') && verbose
+    % specest_convol has been called by ft_freqanalysis, meaning that ft_progress has been initialised
+    ft_progress(fbopt.i./fbopt.n, ['trial %d, ',str,'\n'], fbopt.i);
+  elseif verbose
+    fprintf([str, '\n']);
+  end
+  
   % compute indices that will be used to extracted the requested fft output
   reqtimeboiind    = find((timeboi >=  (acttapnumsmp ./ 2)) & (timeboi < (ndatsample - (acttapnumsmp ./2))));
   reqtimeboi       = timeboi(reqtimeboiind);
