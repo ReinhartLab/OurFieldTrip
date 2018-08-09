@@ -763,6 +763,7 @@ ft_uilayout(h, 'tag', 'viewui', 'BackgroundColor', [0.8 0.8 0.8], 'hpos', 'auto'
 definetrial_cb(h);
 redraw_cb(h);
 
+cfg.h = h;
 % %% Scrollbar
 %
 % % set initial scrollbar value

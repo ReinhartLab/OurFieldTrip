@@ -870,6 +870,8 @@ if isfield(data, 'trialinfo') && strcmp(cfg.keeptrials, 'yes')
   freq.trialinfo = data.trialinfo;
 end
 
+freq.oldfoi = oldfoi;
+
 % do the general cleanup and bookkeeping at the end of the function
 ft_postamble debug
 ft_postamble trackconfig

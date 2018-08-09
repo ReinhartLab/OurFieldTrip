@@ -408,7 +408,7 @@ for p = 1:length(cfg.parameter)
 
         arginstr = sprintf('x%i,', 1:length(varargin));
         arginstr = arginstr(1:end-1); % remove the trailing ','
-        eval(sprintf('operation = @(x) %s;',regexprep( cfg.operation,'[1-9]','{$0}')));
+        eval(sprintf('operation = @(x) %s;',regexprep( cfg.operation,'x(\d*)','x{$1}')));
 
         if ~iscell(varargin{1}.(cfg.parameter{p}))
           % gather x1, x2, ... into a cell-array

@@ -247,9 +247,9 @@ if strcmp(cfg.method, 'spline') || strcmp(cfg.method, 'finite')
     % - units of electrode positions are in mm, which is 10^3 too large
     % these two cancel out against each other. Hence the computed laplacian
     % is in SI units (MKS).
-    scd.trial{trlop} = cfg.conductivity * -1 * scd.trial{trlop};
+    scd.trial{trlop} = [cfg.conductivity * -1 * scd.trial{trlop}]* 10^6;
   end
-  fprintf('output surface laplacian is in V/m^2\n');
+  fprintf('output surface laplacian is in uV/m^2\n');
 else
   fprintf('output Hjorth filtered potential is in uV\n');
 end

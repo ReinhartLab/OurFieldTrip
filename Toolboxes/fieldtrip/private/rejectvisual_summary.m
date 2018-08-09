@@ -72,17 +72,17 @@ uicontrol(h, 'Units', 'normalized', 'position', [0.520 0.520 0.400 0.050], 'Styl
 
 % set up radio buttons for choosing metric
 bgcolor = get(h, 'color');
-g = uibuttongroup('Position', [0.520 0.220 0.375 0.250 ], 'bordertype', 'none', 'backgroundcolor', bgcolor);
-r(1) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  8/9 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'string', 'var',       'HandleVisibility', 'off');
-r(2) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  7/9 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'min',       'HandleVisibility', 'off');
-r(3) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  6/9 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'max',       'HandleVisibility', 'off');
-r(4) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  5/9 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'maxabs',    'HandleVisibility', 'off');
-r(5) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  4/9 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'range',     'HandleVisibility', 'off');
-r(6) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  3/9 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'kurtosis',  'HandleVisibility', 'off');
-r(7) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  2/9 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', '1/var',     'HandleVisibility', 'off');
-r(8) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  1/9 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'zvalue',    'HandleVisibility', 'off');
-r(9) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  0/9 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'maxzvalue', 'HandleVisibility', 'off');
-
+g = uibuttongroup('Position', [0.520 0.220 0.375 0.350 ], 'bordertype', 'none', 'backgroundcolor', bgcolor);
+r(1) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  9/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'string', 'var',       'HandleVisibility', 'off');
+r(2) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  8/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'min',       'HandleVisibility', 'off');
+r(3) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  7/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'max',       'HandleVisibility', 'off');
+r(4) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  6/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'maxabs',    'HandleVisibility', 'off');
+r(5) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  5/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'range',     'HandleVisibility', 'off');
+r(6) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  4/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'kurtosis',  'HandleVisibility', 'off');
+r(7) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  3/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', '1/var',     'HandleVisibility', 'off');
+r(8) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  2/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'zvalue',    'HandleVisibility', 'off');
+r(9) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  1/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'maxzvalue', 'HandleVisibility', 'off');
+r(10) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  0/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', '2std', 'HandleVisibility', 'off');
 % pre-select appropriate metric, if defined
 set(g, 'SelectionChangeFcn', @change_metric);
 for i=1:length(r)
@@ -176,26 +176,29 @@ for i=1:info.ntrl
   ft_progress(i/info.ntrl, 'computing metric %d of %d\n', i, info.ntrl);
   dat = preproc(info.data.trial{i}, info.data.label, offset2time(info.offset(i), info.fsample, size(info.data.trial{i}, 2)), info.cfg.preproc); % not entirely sure whether info.data.time{i} is correct, so making it on the fly
   switch info.metric
-    case 'var'
-      level(:, i) = std(dat, [], 2).^2;
-    case 'min'
-      level(:, i) = min(dat, [], 2);
-    case 'max'
-      level(:, i) = max(dat, [], 2);
-    case 'maxabs'
-      level(:, i) = max(abs(dat), [], 2);
-    case 'range'
-      level(:, i) = max(dat, [], 2) - min(dat, [], 2);
-    case 'kurtosis'
-      level(:, i) = kurtosis(dat, [], 2);
-    case '1/var'
-      level(:, i) = 1./(std(dat, [], 2).^2);
-    case 'zvalue'
-      level(:, i) = mean( (dat-repmat(mval, 1, size(dat, 2)) )./repmat(sd, 1, size(dat, 2)) , 2);
-    case 'maxzvalue'
-      level(:, i) = max( ( dat-repmat(mval, 1, size(dat, 2)) )./repmat(sd, 1, size(dat, 2)) , [], 2);
-    otherwise
-      error('unsupported method');
+      case 'var'
+          level(:, i) = std(dat, [], 2).^2;
+      case 'min'
+          level(:, i) = min(dat, [], 2);
+      case 'max'
+          level(:, i) = max(dat, [], 2);
+      case 'maxabs'
+          level(:, i) = max(abs(dat), [], 2);
+      case 'range'
+          level(:, i) = max(dat, [], 2) - min(dat, [], 2);
+      case 'kurtosis'
+          level(:, i) = kurtosis(dat, [], 2);
+      case '1/var'
+          level(:, i) = 1./(std(dat, [], 2).^2);
+      case 'zvalue'
+          level(:, i) = mean( (dat-repmat(mval, 1, size(dat, 2)) )./repmat(sd, 1, size(dat, 2)) , 2);
+      case 'maxzvalue'
+          level(:, i) = max( ( dat-repmat(mval, 1, size(dat, 2)) )./repmat(sd, 1, size(dat, 2)) , [], 2);
+      case '2std'
+          level(:,i) =    mean(dat,2);
+          
+      otherwise
+          error('unsupported method');
   end
 end
 ft_progress('close');
@@ -263,6 +266,16 @@ switch info.cfg.viewmode
       set(info.axes(2), 'Ytick', []);
     end
 end % switch
+
+if strcmp(info.metric, '2std')
+    hold on
+    plot([mean(maxperchan) - 2*std(maxperchan) mean(maxperchan) - 2*std(maxperchan)],ylim,'r');
+    plot([mean(maxperchan) + 2*std(maxperchan) mean(maxperchan) + 2*std(maxperchan)],ylim,'r');
+    
+    plot([mean(maxperchan) - 3*std(maxperchan) mean(maxperchan) - 3*std(maxperchan)],ylim,'m');
+    plot([mean(maxperchan) + 3*std(maxperchan) mean(maxperchan) + 3*std(maxperchan)],ylim,'m');
+end
+
 if any(info.chansel) && any(info.trlsel)
   % don't try to rescale the axes if they are empty
   % have to use 0 as lower limit because in the single channel case ylim([1 1]) will be invalid
@@ -297,6 +310,16 @@ switch info.cfg.viewmode
       set(info.axes(3), 'Xtick', []);
     end
 end % switch
+
+if strcmp(info.metric, '2std')
+    hold on
+    plot(xlim,[nanmean(maxpertrl) - 2*nanstd(maxpertrl) nanmean(maxpertrl) - 2*nanstd(maxpertrl)],'r');
+    plot(xlim,[nanmean(maxpertrl) + 2*nanstd(maxpertrl) nanmean(maxpertrl) + 2*nanstd(maxpertrl)],'r');
+    
+    plot(xlim,[nanmean(maxpertrl) - 3*nanstd(maxpertrl) nanmean(maxpertrl) - 3*nanstd(maxpertrl)],'m');
+    plot(xlim,[nanmean(maxpertrl) + 3*nanstd(maxpertrl) nanmean(maxpertrl) + 3*nanstd(maxpertrl)],'m');
+end
+
 if any(info.chansel) && any(info.trlsel)
   % don't try to rescale the axes if they are empty
   % the 0.8-1.2 is needed to deal with the single trial case

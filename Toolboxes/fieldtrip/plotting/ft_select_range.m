@@ -69,7 +69,7 @@ multiple    = ft_getopt(varargin, 'multiple', false);
 xrange      = ft_getopt(varargin, 'xrange',   true);
 yrange      = ft_getopt(varargin, 'yrange',   true);
 clear       = ft_getopt(varargin, 'clear',    false);
-contextmenu = ft_getopt(varargin, 'contextmenu'); % this will be displayed following a right mouse click
+contextmenu = ft_getopt(varargin, 'contextmenu',[]); % this will be displayed following a right mouse click
 
 % convert 'yes/no' string to boolean value
 multiple  = istrue(multiple);

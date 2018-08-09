@@ -67,3 +67,10 @@ updated ft_platform_supports
 
 6/12 
 updated ft_singleplotER/TFR
+
+7/23/18
+added .oldfoi in ft_freqanalysis to change pad-modified .freq back to regular range.
+added ft_error 
+
+8/3/2018
+Modified SCD to be in uV/m^2 units instead of the V/m^2 units
