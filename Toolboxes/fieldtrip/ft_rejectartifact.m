@@ -431,7 +431,7 @@ if strcmp(cfg.artfctdef.reject, 'partial') || strcmp(cfg.artfctdef.reject, 'comp
       trlRemovedInd = [trlRemovedInd trial];
       cfg.saminfo(trial) = 0;
     elseif any(rejecttrial) && strcmp(cfg.artfctdef.reject, 'complete')
-      cfg.saminfo(trial) = 0;
+      
       % some part of the trial is bad, check if within crittoilim?
       if (checkCritToi)
         critInd = (data.time{trial} >= cfg.artfctdef.crittoilim(trial,1) ...
@@ -439,15 +439,18 @@ if strcmp(cfg.artfctdef.reject, 'partial') || strcmp(cfg.artfctdef.reject, 'comp
         if (any(critInd & rejecttrial))
           count_complete_reject = count_complete_reject + 1;
           trlRemovedInd = [trlRemovedInd trial];
+          cfg.saminfo(trial) = 0;
           continue;
         else
           trialok = [trialok; trl(trial,:)];
           count_outsidecrit = count_outsidecrit + 1;
+          cfg.saminfo(trial) = 1;
         end
       else % no crittoilim checking required
         count_complete_reject = count_complete_reject + 1;
         trlRemovedInd = [trlRemovedInd trial];
         continue;
+         cfg.saminfo(trial) = 0;
       end
 
     elseif any(rejecttrial) && strcmp(cfg.artfctdef.reject, 'partial')
