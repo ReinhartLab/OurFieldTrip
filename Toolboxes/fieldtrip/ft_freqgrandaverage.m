@@ -201,8 +201,8 @@ for k=1:numel(cfg.parameter)
             tmp(s,:,:,:,:) = varargin{s}.(cfg.parameter{k});
         end
         
-        sizetmp = size(tmp);
-        tmp = permute(nanmean(tmp,1),[sizetmp(2:end) 1]);
+        sizetmp = length(size(tmp));
+        tmp = permute(nanmean(tmp,1),[2:sizetmp 1]);
         
     elseif strcmp(cfg.keepindividual, 'yes')
         tmp = zeros([Nsubj dim{k}]);
