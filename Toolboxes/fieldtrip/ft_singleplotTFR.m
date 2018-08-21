@@ -357,7 +357,7 @@ end
 cla
 hold on
 
-zval = mean(datamatrix, 1); % over channels
+zval = nanmean(datamatrix, 1); % over channels
 zval = reshape(zval, size(zval,2), size(zval,3));
 mask = squeeze(mean(maskmatrix, 1)); % over channels
 
@@ -433,7 +433,7 @@ else
   if length(cfg.channel) == 1
     t = [char(cfg.channel) ' / ' num2str(selchan) ];
   else
-    t = sprintf('mean(%0s)', join_str(', ', cfg.channel));
+    t = sprintf('nanmean(%0s)', join_str(', ', cfg.channel));
   end
 end
 title(t, 'fontsize', cfg.fontsize);

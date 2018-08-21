@@ -399,13 +399,14 @@ if strcmp(cfg.keepchannel, 'no')
 end
 if strcmp(cfg.keeptrial, 'no')
   tmpcfg.trials = find(trlsel); % note that it is keeptrial without S and trials with S
+
 end
 data = ft_selectdata(tmpcfg, data);
 % restore the provenance information
 [cfg, data] = rollback_provenance(cfg, data);
 % restore the original channels and trials parameters
 cfg = copyfields(orgcfg, cfg, {'channel', 'trials'});
-
+data.saminfo = trlsel;
 % convert back to input type if necessary
 switch dtype
   case 'timelock'

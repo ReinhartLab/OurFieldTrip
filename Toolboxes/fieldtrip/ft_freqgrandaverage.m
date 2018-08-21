@@ -195,7 +195,8 @@ for k=1:numel(cfg.parameter)
     if strcmp(cfg.keepindividual, 'no')
         tmp = zeros(dim{k});
         for s=1:Nsubj
-            tmp = tmp + varargin{s}.(cfg.parameter{k})./Nsubj; % do a weighted running sum
+            
+            tmp = nansum([tmp;varargin{s}.(cfg.parameter{k})./Nsubj]); % do a weighted running sum
         end
     elseif strcmp(cfg.keepindividual, 'yes')
         tmp = zeros([Nsubj dim{k}]);

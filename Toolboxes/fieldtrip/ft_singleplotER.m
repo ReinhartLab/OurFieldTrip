@@ -431,9 +431,9 @@ end
 cla
 hold on
 
-yval = mean(datamatrix, 2); % over channels
+yval = nanmean(datamatrix, 2); % over channels
 yval = reshape(yval, size(yval,1), size(yval,3));
-mask = squeeze(mean(maskmatrix, 1)); % over channels
+mask = squeeze(nanmean(maskmatrix, 1)); % over channels
 
 ft_plot_vector(xval, yval, 'style', cfg.linestyle{i}, 'color', graphcolor, ...
   'highlight', mask, 'highlightstyle', cfg.maskstyle, 'linewidth', cfg.linewidth, ...
@@ -482,7 +482,7 @@ else
   if length(cfg.channel) == 1
     t = [char(cfg.channel) ' / ' num2str(selchan) ];
   else
-    t = sprintf('mean(%0s)', join_str(', ', cfg.channel));
+    t = sprintf('nanmean(%0s)', join_str(', ', cfg.channel));
   end
 end
 title(t, 'fontsize', cfg.fontsize);
