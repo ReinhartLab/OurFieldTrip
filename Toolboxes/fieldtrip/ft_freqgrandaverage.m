@@ -163,6 +163,9 @@ for k=1:numel(cfg.parameter)
                 varargin{i}.(cfg.parameter{k}) = varargin{i}.(cfg.parameter{k})(chansel,freqsel);
             case 'chan_freq_time'
                 varargin{i}.(cfg.parameter{k}) = varargin{i}.(cfg.parameter{k})(chansel,freqsel,timesel);
+                 if any(all(all(isnan(varargin{i}.(cfg.parameter{k})),2),3))
+                     warning(['dataset number' num2str(i) ' has a channel with only nans']);
+                 end
             case {'rpt_chan_freq' 'rpttap_chan_freq' 'subj_chan_freq'}
                 varargin{i}.(cfg.parameter{k}) = varargin{i}.(cfg.parameter{k})(:,chansel,freqsel);
             case {'rpt_chan_freq_time' 'rpttap_chan_freq_time' 'subj_chan_freq_time'}
@@ -193,11 +196,14 @@ end
 % allocate memory to hold the data and collect it
 for k=1:numel(cfg.parameter)
     if strcmp(cfg.keepindividual, 'no')
-        tmp = zeros(dim{k});
+        tmp = zeros([Nsubj dim{k}]);
         for s=1:Nsubj
-            
-            tmp = nansum([tmp;varargin{s}.(cfg.parameter{k})./Nsubj]); % do a weighted running sum
+            tmp(s,:,:,:,:) = varargin{s}.(cfg.parameter{k});
         end
+        
+        sizetmp = size(tmp);
+        tmp = permute(nanmean(tmp,1),[sizetmp(2:end) 1]);
+        
     elseif strcmp(cfg.keepindividual, 'yes')
         tmp = zeros([Nsubj dim{k}]);
         for s=1:Nsubj
