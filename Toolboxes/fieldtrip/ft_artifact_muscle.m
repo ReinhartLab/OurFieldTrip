@@ -127,7 +127,7 @@ cfg.artfctdef.muscle.trlpadding = ft_getopt(cfg.artfctdef.muscle, 'trlpadding', 
 cfg.artfctdef.muscle.fltpadding = ft_getopt(cfg.artfctdef.muscle, 'fltpadding', 0.1);
 cfg.artfctdef.muscle.artpadding = max(ft_getopt(cfg.artfctdef.muscle, 'artpadding', 0.1), artpadding_oldstyle);
 cfg.artfctdef.muscle.cutoff     = ft_getopt(cfg.artfctdef.muscle, 'cutoff',     4);
-
+cfg.artfctdef.muscle.interactive     = ft_getopt(cfg.artfctdef.muscle, 'interactive',     'no');
 % construct a temporary configuration that can be passed onto artifact_zvalue
 tmpcfg                  = cfg;
 tmpcfg.artfctdef.zvalue = cfg.artfctdef.muscle;
