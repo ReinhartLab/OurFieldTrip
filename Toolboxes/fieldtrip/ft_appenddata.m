@@ -355,7 +355,7 @@ end
 % do the general cleanup and bookkeeping at the end of the function
 ft_postamble debug
 ft_postamble trackconfig
-ft_postamble provenance
+%ft_postamble provenance
 ft_postamble previous varargin
 ft_postamble history data
 ft_postamble savevar data
