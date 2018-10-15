@@ -12,6 +12,7 @@ function [cfg] = ft_topoplotCC(cfg, freq)
 %   cfg.widthparam  = string, parameter to be used to control the line width (see below)
 %   cfg.alphaparam  = string, parameter to be used to control the opacity (see below)
 %   cfg.colorparam  = string, parameter to be used to control the line color
+%   cfg.CLim        = [min max]
 %
 % The widthparam should be indicated in pixels, e.g. usefull numbers are 1
 % and larger.
@@ -89,9 +90,9 @@ cfg.newfigure  = ft_getopt(cfg, 'newfigure',  'yes');
 cfg.arrowhead  = ft_getopt(cfg, 'arrowhead', 'none'); % none, stop, start, both
 cfg.arrowsize  = ft_getopt(cfg, 'arrowsize', nan);    % length of the arrow head, should be in in figure units, i.e. the same units as the layout
 cfg.arrowoffset = ft_getopt(cfg, 'arrowoffset', nan); % absolute, should be in figure units, i.e. the same units as the layout
-cfg.arrowlength = ft_getopt(cfg, 'arrowlength', 0.8);% relative to the complete line
+cfg.arrowlength = ft_getopt(cfg, 'arrowlength', 1.5);% relative to the complete line
 cfg.linestyle   = ft_getopt(cfg, 'linestyle',   []);
-cfg.colormap    = ft_getopt(cfg, 'colormap',    colormap);
+cfg.colormap    = ft_getopt(cfg, 'colormap',    colormap('jet'));
 
 lay = ft_prepare_layout(cfg, freq);
 
@@ -100,12 +101,12 @@ endlabel = freq.labelcmb(:,2);
 ncmb     = size(freq.labelcmb,1);
 
 % select the data to be used in the figure
-fbin = nearest(freq.freq, cfg.foi);
+fbin = logical(nearest(freq.freq, cfg.foi));
 
 if isfield(freq, cfg.widthparam)
   widthparam = freq.(cfg.widthparam)(:,fbin);
 else
-  widthparam = ones(ncmb,1);
+  widthparam = ones(ncmb,1)*2;
 end
 
 if isfield(freq, cfg.alphaparam)
@@ -120,9 +121,18 @@ else
   colorparam = [];
 end
 
-if strcmp(cfg.newfigure, 'yes')
-  figure
+if ~isfield(cfg,'CLim')
+  cmin = min(colorparam(:));
+  cmax = max(colorparam(:));
+else
+  cmin = cfg.CLim(1);
+  cmax = cfg.CLim(2);
 end
+
+if strcmp(cfg.newfigure, 'yes')
+%   figure
+end
+
 
 hold on
 axis equal
@@ -153,19 +163,20 @@ end
 
 rgb  = cfg.colormap;
 if ~isempty(colorparam)
-  cmin = min(colorparam(:));
-  cmax = max(colorparam(:));
+
 
   % this line creates a sorting vector that cause the most extreme valued
   % arrows to be plotted last
-  [srt, srtidx] = sort(abs(colorparam));
+  [srt, srtidx] = sort(abs(colorparam(:)));
 
-  colorparam = (colorparam - cmin)./(cmax-cmin);
-  colorparam = round(colorparam * (size(rgb,1)-1) + 1);
+   colorparam = (colorparam - cmin)./(cmax-cmin);
+   colorparam = round(colorparam * (size(rgb,1)-1) + 1);
 end
 
 if strcmp(cfg.newfigure, 'yes')
-  ft_plot_lay(lay, 'label', 'no', 'box', 'off');
+  ft_plot_lay(lay, 'label', 'yes', 'box', 'off');
+  caxis([cmin cmax]);
+  colorbar;
 end % if newfigure
 
 % fix the limits for the axis
