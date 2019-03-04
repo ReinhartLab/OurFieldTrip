@@ -378,27 +378,41 @@ if strcmp(cfg.keeptrials,'yes') && strcmp(cfg.keeptapers,'yes')
   end
 end
 
+if strcmp(cfg.keeptrials,'yes') && strcmp(cfg.output, 'powanditpc')
+     error('Keeping trials not possible with itc as the output.');
+end
+
 % Set flags for output
 if strcmp(cfg.output,'pow')
   powflg = 1;
   csdflg = 0;
   fftflg = 0;
+  itcflg = 0;
 elseif strcmp(cfg.output,'powandcsd')
   powflg = 1;
   csdflg = 1;
   fftflg = 0;
+  itcflg = 0;
 elseif strcmp(cfg.output,'fourier')
   powflg = 0;
   csdflg = 0;
   fftflg = 1;
+  itcflg = 0;
 elseif strcmp(cfg.output,'csd')
     powflg = 0;
     csdflg = 1;
     fftflg = 0;
+    itcflg = 0;
 elseif strcmp(cfg.output,'fourierandcsd')
     powflg = 0;
     csdflg = 1;
     fftflg = 1;
+    itcflg = 0;
+elseif strcmp(cfg.output,'powanditpc')
+    powflg = 1;
+    csdflg = 0;
+    fftflg = 0;
+    itcflg = 1;
 else
   error('Unrecognized output required');
 end
@@ -603,6 +617,7 @@ for itrial = 1:ntrials
       if powflg, powspctrm     = zeros(nchan,nfoi,ntoi,cfg.precision);             end
       if csdflg, crsspctrm     = complex(zeros(nchancmb,nfoi,ntoi,cfg.precision)); end
       if fftflg, fourierspctrm = complex(zeros(nchan,nfoi,ntoi,cfg.precision));    end
+      if itcflg, itcspctrm     = zeros(nchan,nfoi,ntoi,cfg.precision);             end
       dimord    = 'chan_freq_time';
     elseif keeprpt == 2 % cfg.keeptrials,'yes' &&  cfg.keeptapers,'no'
       if powflg, powspctrm     = nan(ntrials,nchan,nfoi,ntoi,cfg.precision);                                                                 end
@@ -687,6 +702,9 @@ for itrial = 1:ntrials
       if csdflg
         csddum =      spectrum(acttap,cutdatindcmb(:,1),foiind(ifoi),acttboi) .* conj(spectrum(acttap,cutdatindcmb(:,2),foiind(ifoi),acttboi));
       end
+      if itcflg
+        itcdum = spectrum(acttap,:,foiind(ifoi),acttboi);
+      end
 
       % switch between keep's
       switch keeprpt
@@ -706,6 +724,11 @@ for itrial = 1:ntrials
           end
           if csdflg
             crsspctrm(:,ifoi,acttboi) = crsspctrm(:,ifoi,acttboi) + (reshape(mean(csddum,1),[nchancmb 1 nacttboi]) ./ ntrials);
+            %crsspctrm(:,ifoi,~acttboi) = NaN;
+          end
+          
+          if itcflg
+            itcspctrm(:,ifoi,acttboi) = itcspctrm(:,ifoi,acttboi) + ([reshape(mean(itcdum,1),[nchancmb 1 nacttboi])/abs(reshape(mean(itcdum,1),[nchancmb 1 nacttboi]))] ./ ntrials);
             %crsspctrm(:,ifoi,~acttboi) = NaN;
           end
 
@@ -760,6 +783,10 @@ for itrial = 1:ntrials
     if csdflg
       crsspctrm(currrptind,:,:,:) =          spectrum(cutdatindcmb(:,1),:,:) .* ...
         conj(spectrum(cutdatindcmb(:,2),:,:));
+    end
+    
+    if itcflag
+        itcspctrm(currrptind,:,:) = spectrum/abs(spectrum);
     end
 
   end
@@ -845,6 +872,12 @@ if csdflg
   freq.labelcmb  = cfg.channelcmb;
   freq.crsspctrm = crsspctrm;
 end
+
+if itcflg
+   freq.itcspctrm = permute(abs(mean(itcspctrm,1)),[2 3 4 1]);  
+end
+
+
 if strcmp(cfg.calcdof, 'yes');
   freq.dof = 2 .* dof;
 end;
