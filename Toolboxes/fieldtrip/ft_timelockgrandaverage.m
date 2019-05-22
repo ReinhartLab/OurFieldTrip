@@ -110,6 +110,7 @@ cfg.latency        = ft_getopt(cfg, 'latency',    'all');
 cfg.normalizevar   = ft_getopt(cfg, 'normalizevar', 'N-1');
 cfg.method         = ft_getopt(cfg, 'method',    'across');
 cfg.parameter      = ft_getopt(cfg, 'parameter',  'avg');
+cfg.type           = ft_getopt(cfg, 'type',  'mean');
 
 if iscell(cfg.parameter)
   if numel(cfg.parameter)>1
@@ -187,7 +188,13 @@ else % ~strcmp(cfg.keepindividual, 'yes')
   end
   % average across subject dimension
   ResultDOF      = reshape(sum(avgdof, 1), datsiz);
-  grandavg.avg   = reshape(sum(avgmat, 1), datsiz)./ResultDOF; % computes both means (plain and weighted)
+  
+  switch cfg.type
+      case 'mean'
+          grandavg.avg   = reshape(sum(avgmat, 1), datsiz)./ResultDOF; % computes both means (plain and weighted)
+      case 'sem'
+          grandavg.avg   =std(avgmat,[], 1); % computes both means (plain and weighted)
+  end
   % Nchan x Nsamples, skips the singleton
   % if strcmp(cfg.method, 'across')
   ResultVar      = reshape(sum(avgvar,1), datsiz)-reshape(sum(avgmat,1), datsiz).^2./ResultDOF;

@@ -101,22 +101,22 @@ endlabel = freq.labelcmb(:,2);
 ncmb     = size(freq.labelcmb,1);
 
 % select the data to be used in the figure
-fbin = logical(nearest(freq.freq, cfg.foi));
+% fbin = logical(nearest(freq.freq, cfg.foi));
 
 if isfield(freq, cfg.widthparam)
-  widthparam = freq.(cfg.widthparam)(:,fbin);
+  widthparam = freq.(cfg.widthparam); %(:,fbin);
 else
   widthparam = ones(ncmb,1)*2;
 end
 
 if isfield(freq, cfg.alphaparam)
-  alphaparam = freq.(cfg.alphaparam)(:,fbin);
+  alphaparam = freq.(cfg.alphaparam); %(:,fbin);
 else
   alphaparam = [];
 end
 
 if isfield(freq, cfg.colorparam)
-  colorparam = freq.(cfg.colorparam)(:,fbin);
+  colorparam = freq.(cfg.colorparam); %(:,fbin);
 else
   colorparam = [];
 end

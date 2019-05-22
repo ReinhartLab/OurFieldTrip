@@ -81,6 +81,7 @@ cfg.channel        = ft_getopt(cfg, 'channel',    'all');
 cfg.foilim         = ft_getopt(cfg, 'foilim',     'all');
 cfg.toilim         = ft_getopt(cfg, 'toilim',     'all');
 cfg.parameter      = ft_getopt(cfg, 'parameter',  []);
+cfg.type           = ft_getopt(cfg, 'type',  'mean');
 
 if isempty(cfg.parameter) && isfield(varargin{1}, 'powspctrm')
     cfg.parameter = 'powspctrm';
@@ -202,8 +203,16 @@ for k=1:numel(cfg.parameter)
         end
         
         sizetmp = length(size(tmp));
-        tmp = permute(nanmean(tmp,1),[2:sizetmp 1]);
         
+        if strcmpi(cfg.type,'mean')
+        
+        tmp = permute(nanmean(tmp,1),[2:sizetmp 1]);
+        elseif strcmpi(cfg.type,'sem')
+            
+        tmp = permute(nanvar(tmp,[],1),[2:sizetmp 1]);    
+        else
+            error('cfg.type == mean or std only')
+        end
     elseif strcmp(cfg.keepindividual, 'yes')
         tmp = zeros([Nsubj dim{k}]);
         for s=1:Nsubj
