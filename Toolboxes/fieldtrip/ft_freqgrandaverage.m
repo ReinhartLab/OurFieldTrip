@@ -209,7 +209,7 @@ for k=1:numel(cfg.parameter)
         tmp = permute(nanmean(tmp,1),[2:sizetmp 1]);
         elseif strcmpi(cfg.type,'sem')
             
-        tmp = permute(nanvar(tmp,[],1),[2:sizetmp 1]);    
+        tmp = permute(nanstd(tmp,1,1)/sqrt(size(tmp,1)),[2:sizetmp 1]);    
         else
             error('cfg.type == mean or std only')
         end
