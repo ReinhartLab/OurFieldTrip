@@ -246,6 +246,12 @@ cla(info.axes(2));
 switch info.cfg.viewmode
   case 'remove'
     plot(maxperchan(info.chansel==1),     find(info.chansel==1), '.');
+    hold on;
+    
+    if isfield(info.cfg,'eog')
+        plot(maxperchan(ismember(info.data.label,info.cfg.eog)),find(ismember(info.data.label,info.cfg.eog)),'r.');
+    end
+    hold off;
     xmax = max(maxperchan);
     xmin = min(maxperchan);
     ymax = info.nchan;
@@ -269,11 +275,11 @@ end % switch
 
 if strcmp(info.metric, '2std')
     hold on
-    plot([mean(maxperchan) - 2*std(maxperchan) mean(maxperchan) - 2*std(maxperchan)],ylim,'r');
-    plot([mean(maxperchan) + 2*std(maxperchan) mean(maxperchan) + 2*std(maxperchan)],ylim,'r');
+    plot([nanmean(maxperchan) - 2*nanstd(maxperchan) nanmean(maxperchan) - 2*nanstd(maxperchan)],ylim,'r');
+    plot([nanmean(maxperchan) + 2*nanstd(maxperchan) nanmean(maxperchan) + 2*nanstd(maxperchan)],ylim,'r');
     
-    plot([mean(maxperchan) - 3*std(maxperchan) mean(maxperchan) - 3*std(maxperchan)],ylim,'m');
-    plot([mean(maxperchan) + 3*std(maxperchan) mean(maxperchan) + 3*std(maxperchan)],ylim,'m');
+    plot([nanmean(maxperchan) - 3*nanstd(maxperchan) nanmean(maxperchan) - 3*nanstd(maxperchan)],ylim,'m');
+    plot([nanmean(maxperchan) + 3*nanstd(maxperchan) nanmean(maxperchan) + 3*nanstd(maxperchan)],ylim,'m');
 end
 
 if any(info.chansel) && any(info.trlsel)
