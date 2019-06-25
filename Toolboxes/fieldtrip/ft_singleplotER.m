@@ -463,8 +463,8 @@ if ~isempty(cfg.maskparameter)
   ptchs = findobj(gcf, 'type', 'patch');
   for i = 1:length(ptchs)
     YData = get(ptchs(i), 'YData');
-    YData(YData == min(YData)) = ymin;
-    YData(YData == max(YData)) = ymax;
+    %YData(YData == min(YData)) = ymin;
+    %YData(YData == max(YData)) = ymax;
     set(ptchs(i), 'YData',YData);
   end
 end

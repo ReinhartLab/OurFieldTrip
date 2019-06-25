@@ -263,7 +263,7 @@ if ~isempty(highlight) && ~islogical(highlight)
     % only warn if really different from 0/1
     warning('converting mask to logical values')
   end
-  highlight=logical(highlight);
+  %highlight=logical(highlight);
 end
 
 switch highlightstyle
