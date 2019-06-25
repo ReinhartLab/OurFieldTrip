@@ -343,9 +343,9 @@ if ~isempty(cfg.maskparameter)
       warning(sprintf('Using field "%s" for masking, cfg.maskalpha is ignored.', cfg.maskparameter))
     end
     % scale mask between 0 and 1
-    minval = min(maskmatrix(:));
-    maxval = max(maskmatrix(:));
-    maskmatrix = (maskmatrix - minval) / (maxval-minval);
+    %minval = min(maskmatrix(:));
+    %maxval = max(maskmatrix(:));
+    %maskmatrix = (maskmatrix - minval) / (maxval-minval);
   end
 else
   % create an Nx0x0 matrix
