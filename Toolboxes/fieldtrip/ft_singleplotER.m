@@ -423,7 +423,7 @@ if ~isempty(cfg.maskparameter)
   maskmatrix = varargin{1}.(cfg.maskparameter)(selchan, selx);
 else
   % create an Nx0 matrix
-  maskmatrix = zeros(length(selchan), 0);
+  maskmatrix = zeros(length(selchan), length(selx));
 end
 
 %% Section 4: do the actual plotting
