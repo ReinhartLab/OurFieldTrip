@@ -466,6 +466,16 @@ else
   label  = data.label;
 end
 
+hasrpt = any(ismember(dimtok, {'rpt' 'subj'}));
+
+% if hasrpt
+%     tmpcfg.avgoverrpt = 'yes';
+% else
+%     tmpcfg.avgoverrpt = 'no';
+% end
+% 
+% data = ft_selectdata(tmpcfg, data);
+
 % Make data vector with one scalar value for each channel
 dat = data.(cfg.parameter);
 % get dimord dimensions
@@ -508,10 +518,10 @@ if isfield(data, cfg.maskparameter)
     msk = msk(sellab, selx);
   end
   
-  if size(msk,2)>1 || size(msk,3)>1
-    ft_warning('no masking possible for average over multiple latencies or frequencies -> cfg.maskparameter cleared')
-    msk = [];
-  end
+%   if size(msk,2)>1 || size(msk,3)>1
+%     ft_warning('no masking possible for average over multiple latencies or frequencies -> cfg.maskparameter cleared')
+%     msk = [];
+  %end
   
 else
   msk = [];
