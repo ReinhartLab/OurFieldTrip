@@ -142,7 +142,7 @@ if trlnum>1,
         end
       end
     else
-      warning('samples present in multiple trials, using only the last occurence of each sample')
+      %warning('samples present in multiple trials, using only the last occurence of each sample')
     end
   end
   
