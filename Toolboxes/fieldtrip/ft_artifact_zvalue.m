@@ -567,11 +567,11 @@ for trlop=1:opt.numtrl
 end
 
  
-artval = [opt.artval{:}];
+%artval = [opt.artval{:}];
 
 % find the padded artifacts and put them in a Nx2 trl-like matrix
-artbeg = find(diff([0 artval])== 1);
-artend = find(diff([artval 0])==-1);
+artbeg = find(diff([0 dum])== 1);
+artend = find(diff([dum 0])==-1);
 artifact = [artbeg(:) artend(:)];
 
 if strcmp(cfg.artfctdef.zvalue.artfctpeak,'yes')
