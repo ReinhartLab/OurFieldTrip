@@ -812,7 +812,7 @@ for itrial = 1:ntrials
         conj(spectrum(cutdatindcmb(:,2),:,:));
     end
     
-    if itcflag
+    if itcflg
         itcspctrm(currrptind,:,:) = spectrum/abs(spectrum);
     end
 
