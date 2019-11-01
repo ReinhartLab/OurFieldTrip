@@ -79,6 +79,11 @@ sel1 = design(cfg.ivar,:)==1;
 sel2 = design(cfg.ivar,:)==2;
 nreplc1 = sum(~isnan(dat(:,sel1)), 2);
 nreplc2 = sum(~isnan(dat(:,sel2)), 2);
+
+if all(~nreplc2)
+    nreplc2 = nreplc1;
+end
+
 nrepl   = nreplc1 + nreplc2;
 hasnans1 = any(nreplc1<sum(sel1));
 hasnans2 = any(nreplc2<sum(sel2));
@@ -108,6 +113,11 @@ if strcmp(cfg.computestat, 'yes')
     avg2 = mean(dat(:,sel2), 2);
     %var2 = var(dat(:,sel2), 0, 2);
     var2 = (sum(dat(:,sel2).^2,2)-(avg2.^2).*nreplc2)./(nreplc2-1);
+  end
+  
+  if all(isnan(var2))
+      var2 = zeros(size(var2));
+      avg2 = zeros(size(avg2));
   end
  
   varc = (1./nreplc1 + 1./nreplc2).*((nreplc1-1).*var1 + (nreplc2-1).*var2)./df;

@@ -355,7 +355,7 @@ if strcmp(cfg.output, 'fourier')
   cfg.keeptrials = ft_getopt(cfg, 'keeptrials', 'yes');
   cfg.keeptapers = ft_getopt(cfg, 'keeptapers', 'yes');
   if strcmp(cfg.keeptrials, 'no') || strcmp(cfg.keeptapers, 'no')
-%    ft_error('cfg.output = ''fourier'' requires cfg.keeptrials = ''yes'' and cfg.keeptapers = ''yes''');
+    ft_error('cfg.output = ''fourier'' requires cfg.keeptrials = ''yes'' and cfg.keeptapers = ''yes''');
   end
 else
   cfg.keeptrials = ft_getopt(cfg, 'keeptrials', 'no');

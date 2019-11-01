@@ -73,16 +73,17 @@ uicontrol(h, 'Units', 'normalized', 'position', [0.520 0.520 0.400 0.050], 'Styl
 % set up radio buttons for choosing metric
 bgcolor = get(h, 'color');
 g = uibuttongroup('Position', [0.520 0.220 0.375 0.350 ], 'bordertype', 'none', 'backgroundcolor', bgcolor);
-r(1) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  9/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'string', 'var',       'HandleVisibility', 'off');
-r(2) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  8/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'min',       'HandleVisibility', 'off');
-r(3) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  7/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'max',       'HandleVisibility', 'off');
-r(4) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  6/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'maxabs',    'HandleVisibility', 'off');
-r(5) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  5/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'range',     'HandleVisibility', 'off');
-r(6) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  4/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'kurtosis',  'HandleVisibility', 'off');
-r(7) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  3/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', '1/var',     'HandleVisibility', 'off');
-r(8) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  2/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'zvalue',    'HandleVisibility', 'off');
-r(9) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  1/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'maxzvalue', 'HandleVisibility', 'off');
-r(10) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  0/10 0.40 0.15 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', '2std', 'HandleVisibility', 'off');
+r(1) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  10/11 0.40 1/11 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'string', 'var',       'HandleVisibility', 'off');
+r(2) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  9/11 0.40 1/11 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'min',       'HandleVisibility', 'off');
+r(3) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  8/11 0.40 1/11 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'max',       'HandleVisibility', 'off');
+r(4) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  7/11 0.40 1/11 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'maxabs',    'HandleVisibility', 'off');
+r(5) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  6/11 0.40 1/11 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'range',     'HandleVisibility', 'off');
+r(6) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  5/11 0.40 1/11 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'kurtosis',  'HandleVisibility', 'off');
+r(7) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  4/11 0.40 1/11 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'MaxPower',     'HandleVisibility', 'off');
+r(8) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  3/11 0.40 1/11 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'MaxPowerIndex',     'HandleVisibility', 'off');
+r(9) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  2/11 0.40 1/11 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'zvalue',    'HandleVisibility', 'off');
+r(10) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  1/11 0.40 1/11 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', 'maxzvalue', 'HandleVisibility', 'off');
+r(11) = uicontrol('Units', 'normalized', 'parent', g, 'position', [ 0.0  0/11 0.40 1/11 ], 'Style', 'Radio', 'backgroundcolor', bgcolor, 'String', '2std', 'HandleVisibility', 'off');
 % pre-select appropriate metric, if defined
 set(g, 'SelectionChangeFcn', @change_metric);
 for i=1:length(r)
@@ -188,8 +189,14 @@ for i=1:info.ntrl
           level(:, i) = max(dat, [], 2) - min(dat, [], 2);
       case 'kurtosis'
           level(:, i) = kurtosis(dat, [], 2);
+      case 'MaxPowerIndex'
+          power = abs(fft(dat,[],2)).^2;
+          [~,level(:,i)] = max(power(:,1:58),[],2);
+      case 'MaxPower'
+          power = abs(fft(dat,[],2)).^2;
+          level(:,i) = max(power(:,1:58),[],2);   %level(:,i) = mean(power(:,2:floor([size(power,2)/2])),2);         
       case '1/var'
-          level(:, i) = 1./(std(dat, [], 2).^2);
+%           level(:, i) = 1./(std(dat, [], 2).^2);
       case 'zvalue'
           level(:, i) = mean( (dat-repmat(mval, 1, size(dat, 2)) )./repmat(sd, 1, size(dat, 2)) , 2);
       case 'maxzvalue'
