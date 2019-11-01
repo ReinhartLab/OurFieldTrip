@@ -208,7 +208,6 @@ if (isfield(cfg, 'holdfig') && cfg.holdfig==0) || ~isfield(cfg, 'holdfig')
   hold on;
 end
 
-for k = 1:nchan
 for k = 1:numel(data.labellow)
   for m = 1:numel(data.labelhigh)
       ix  = k;
