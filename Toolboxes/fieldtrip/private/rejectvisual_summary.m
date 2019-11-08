@@ -258,6 +258,11 @@ switch info.cfg.viewmode
     if isfield(info.cfg,'eog')
         plot(maxperchan(ismember(info.data.label,info.cfg.eog)),find(ismember(info.data.label,info.cfg.eog)),'r.');
     end
+    
+    if isfield(info.cfg,'components')
+        plot(maxperchan(ismember(info.data.label,info.cfg.components)),find(ismember(info.data.label,info.cfg.components)),'g.');
+    end
+    
     hold off;
     xmax = max(maxperchan);
     xmin = min(maxperchan);
