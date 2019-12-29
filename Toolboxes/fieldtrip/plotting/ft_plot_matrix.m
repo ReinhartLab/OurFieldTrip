@@ -79,6 +79,7 @@ highlight      = ft_getopt(varargin, 'highlight');
 highlightstyle = ft_getopt(varargin, 'highlightstyle', 'opacity');
 box            = ft_getopt(varargin, 'box',            false);
 tag            = ft_getopt(varargin, 'tag',            '');
+imagetype      = ft_getopt(varargin, 'imagetype',      'imagesc');
 
 if ~isempty(highlight) && ~isequal(size(highlight), size(cdat))
   error('the dimensions of the highlight should be identical to the dimensions of the data');
@@ -239,7 +240,14 @@ vdat = vdat + vpos;
 
 % the uimagesc-call needs to be here to avoid calling it several times in switch-highlight
 if isempty(highlight)
-  h = uimagesc(hdat, vdat, cdat, clim);
+    
+    switch imagetype
+        case 'imagesc'
+            h = uimagesc(hdat, vdat, cdat, clim);
+        case 'contourf'
+            [~, h] = contourf(hdat, vdat, cdat, 15);
+            h.LineColor = 'none';
+    end
   set(h,'tag',tag);
 end
 
@@ -247,18 +255,28 @@ end
 if ~isempty(highlight)
   switch highlightstyle
     case 'opacity'
-      % get the same scaling for 'highlight' then what we will get for cdata
-      h = uimagesc(hdat, vdat, highlight);
-      highlight = get(h, 'CData');
-      delete(h); % this is needed because "hold on" might have been called previously, e.g. in ft_multiplotTFR
-      h = uimagesc(hdat, vdat, cdat, clim);
-      set(h,'tag',tag);
-      if ft_platform_supports('alim')
-        set(h,'AlphaData',highlight);
-        set(h, 'AlphaDataMapping', 'scaled');
-        alim([0 1]);
-      end
-      
+        
+        switch imagetype
+            case 'imagesc'
+                % get the same scaling for 'highlight' then what we will get for cdata
+                h = uimagesc(hdat, vdat, highlight);
+                highlight = get(h, 'CData');
+                delete(h); % this is needed because "hold on" might have been called previously, e.g. in ft_multiplotTFR
+                h = uimagesc(hdat, vdat, cdat, clim);
+                set(h,'tag',tag);
+                if ft_platform_supports('alim')
+                    set(h,'AlphaData',highlight);
+                    set(h, 'AlphaDataMapping', 'scaled');
+                    alim([0 1]);
+                end
+                
+            case 'contourf'
+                [~, h] = contourf(hdat, vdat, cdat, 15);
+                h.LineColor = 'none';     
+                h.UserData = h.ZData;
+                highlight(~logical(round(highlight))) = nan;
+                h.ZData = h.ZData.*highlight;
+        end
     case 'saturation'
       % This approach changes the color of pixels to white, regardless of colormap, without using opengl
       % It does by converting by:

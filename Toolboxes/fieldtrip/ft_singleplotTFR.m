@@ -149,6 +149,8 @@ cfg.directionality = ft_getopt(cfg, 'directionality', []);
 cfg.figurename     = ft_getopt(cfg, 'figurename',     []);
 cfg.parameter      = ft_getopt(cfg, 'parameter',     'powspctrm');
 
+cfg.imagetype      = ft_getopt(cfg, 'imagetype',     'imagesc');
+
 % this is needed for the figure title and correct labeling of graphcolor later on
 if nargin>1
   if isfield(cfg, 'dataname')
@@ -314,7 +316,7 @@ evenx = all(abs(diff(xval)/dx-1)<1e-12);     % true if X is linearly spaced
 eveny = all(abs(diff(yval)/dy-1)<1e-12);     % true if Y is linearly spaced
 
 if ~evenx || ~eveny
-  ft_warning('(one of the) axis is/are not evenly spaced, but plots are made as if axis are linear')
+  %ft_warning('(one of the) axis is/are not evenly spaced, but plots are made as if axis are linear')
 end
 
 % masking is only possible for evenly spaced axis
@@ -383,17 +385,17 @@ end
 if isequal(cfg.masknans, 'yes') && isempty(cfg.maskparameter)
   nans_mask = ~isnan(zval);
   mask = double(nans_mask);
-  ft_plot_matrix(xval, yval, zval, 'clim', [zmin zmax], 'tag', 'cip', 'highlightstyle', cfg.maskstyle, 'highlight', mask)
+  ft_plot_matrix(xval, yval, zval, 'clim', [zmin zmax], 'tag', 'cip', 'highlightstyle', cfg.maskstyle, 'highlight', mask, 'imagetype', cfg.imagetype)
 elseif isequal(cfg.masknans, 'yes') && ~isempty(cfg.maskparameter)
   nans_mask = ~isnan(zval);
   mask = mask .* nans_mask;
   mask = double(mask);
-  ft_plot_matrix(xval, yval, zval, 'clim', [zmin zmax], 'tag', 'cip', 'highlightstyle', cfg.maskstyle, 'highlight', mask)
+  ft_plot_matrix(xval, yval, zval, 'clim', [zmin zmax], 'tag', 'cip', 'highlightstyle', cfg.maskstyle, 'highlight', mask, 'imagetype', cfg.imagetype)
 elseif isequal(cfg.masknans, 'no') && ~isempty(cfg.maskparameter)
   mask = double(mask);
-  ft_plot_matrix(xval, yval, zval, 'clim', [zmin zmax], 'tag', 'cip', 'highlightstyle', cfg.maskstyle, 'highlight', mask)
+  ft_plot_matrix(xval, yval, zval, 'clim', [zmin zmax], 'tag', 'cip', 'highlightstyle', cfg.maskstyle, 'highlight', mask, 'imagetype', cfg.imagetype)
 else
-  ft_plot_matrix(xval, yval, zval, 'clim', [zmin zmax], 'tag', 'cip')
+  ft_plot_matrix(xval, yval, zval, 'clim', [zmin zmax], 'tag', 'cip', 'imagetype', cfg.imagetype)
 end
 
 % set colormap

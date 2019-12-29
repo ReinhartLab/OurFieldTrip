@@ -193,7 +193,8 @@ if ~isempty(datmask)
     maskimage = maskimagetmp;
   else
     %maskimage = (maskimage + maskimagetmp) > 1.01;
-    maskimage = (maskimage .* maskimagetmp);
+    %maskimage = (maskimage .* maskimagetmp); % commented out 12/28/19
+    %-john
   end
 end
 
@@ -333,6 +334,10 @@ end
 % Plot filled contours
 if strcmp(style, 'isofill') && ~isempty(isolines)
   [cont, h] = contourf(Xi, Yi, Zi, isolines, 'k');
+  h.LineColor = 'none';
+  h.UserData = h.ZData;
+  maskimage(~logical(round(maskimage))) = nan;
+  h.ZData = h.ZData.*maskimage;
   set(h, 'tag', tag);
   if ~isempty(parent)
     set(h, 'Parent', parent);

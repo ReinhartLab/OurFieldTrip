@@ -63,7 +63,7 @@ else
 end
 
 if isempty(trl)
-  ft_warning('the data does not contain a trial definition');
+  %ft_warning('the data does not contain a trial definition');
 elseif ~isempty(trl) && size(trl,1)~=numel(nsmp)
   ft_warning('the trial definition in the configuration is inconsistent with the actual data');
   trl = [];
@@ -76,7 +76,7 @@ elseif nsmp~=(trl(:,2)-trl(:,1)+1)
 end
 
 if isempty(trl) || ~all(nsmp==trl(:,2)-trl(:,1)+1)
-  ft_warning('reconstructing sampleinfo by assuming that the trials are consecutive segments of a continuous recording');
+  %ft_warning('reconstructing sampleinfo by assuming that the trials are consecutive segments of a continuous recording');
   % construct a trial definition on the fly, assume that the trials are
   % consecutive segments of a continuous recording
   if ntrial==1,

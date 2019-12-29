@@ -930,7 +930,9 @@ if isfield(data, 'trialinfo') && strcmp(cfg.keeptrials, 'yes')
   freq.trialinfo = data.trialinfo;
 end
 
+if length(oldfoi) == length(freq.freq)
 freq.freq = oldfoi;
+end
 
 % do the general cleanup and bookkeeping at the end of the function
 ft_postamble debug
