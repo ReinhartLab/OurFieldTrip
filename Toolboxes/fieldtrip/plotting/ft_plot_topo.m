@@ -190,11 +190,11 @@ if ~isempty(datmask)
   yi           = linspace(vlim(1), vlim(2), gridscale);   % y-axis for interpolation (row vector)
   maskimagetmp = griddata(chanX', chanY, double(datmask), xi', yi, 'nearest'); % interpolate the mask data
   if isempty(maskimage)
-    maskimage = maskimagetmp;
+  maskimage = maskimagetmp;
   else
-    %maskimage = (maskimage + maskimagetmp) > 1.01;
-    %maskimage = (maskimage .* maskimagetmp); % commented out 12/28/19
-    %-john
+  maskimage = (maskimage + maskimagetmp) > 1.01;
+  maskimage = (maskimage .* maskimagetmp); % commented out 12/28/19
+  %-john
   end
 end
 
