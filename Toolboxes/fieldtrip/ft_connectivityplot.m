@@ -75,7 +75,7 @@ dtype = cell(Ndata, 1);
 iname = cell(Ndata+1, 1);
 for k = 1:Ndata
   % check if the input data is valid for this function
-  varargin{k} = ft_checkdata(varargin{k}, 'datatype', {'timelock', 'freq'});
+  %varargin{k} = ft_checkdata(varargin{k}, 'datatype', {'timelock', 'freq'});
   dtype{k}    = ft_datatype(varargin{k});
 
   % convert into the the supported dimord
@@ -200,7 +200,7 @@ data             = ft_selectdata(tmpcfg, data);
 [cfg, data] = rollback_provenance(cfg, data);
 
 dat   = data.(cfg.parameter);
-nchan = numel(data.label);
+%nchan = numel(data.label);
 nfreq = numel(data.freq);
 
 if (isfield(cfg, 'holdfig') && cfg.holdfig==0) || ~isfield(cfg, 'holdfig')
@@ -208,13 +208,12 @@ if (isfield(cfg, 'holdfig') && cfg.holdfig==0) || ~isfield(cfg, 'holdfig')
   hold on;
 end
 
-for k = 1:nchan
-  for m = 1:nchan
-    if k~=m
+for k = 1:numel(data.labellow)
+  for m = 1:numel(data.labelhigh)
       ix  = k;
-      iy  = nchan - m + 1;
+      iy  = numel(data.labellow) - m + 1;
       % use the convention of the row-channel causing the column-channel
-      tmp = reshape(dat(m,k,:), [nfreq 1]);
+      tmp = reshape(dat(k,m), [nfreq 1]);
       ft_plot_vector(tmp, 'width', 1, 'height', 1, 'hpos', ix.*1.2, 'vpos', iy.*1.2, 'vlim', cfg.zlim, 'box', 'yes', 'color', cfg.graphcolor(1));
       if k==1,
         % first column, plot scale on y axis
@@ -222,13 +221,12 @@ for k = 1:nchan
         ft_plot_text( ix.*1.2-0.5,iy.*1.2-0.5,num2str(cfg.zlim(1),3),'HorizontalAlignment','Right','VerticalAlignment','Middle','Fontsize',fontsize,'Interpreter','none');
         ft_plot_text( ix.*1.2-0.5,iy.*1.2+0.5,num2str(cfg.zlim(2),3),'HorizontalAlignment','Right','VerticalAlignment','Middle','Fontsize',fontsize,'Interpreter','none');
       end
-      if m==nchan,
+      if m==numel(data.labelhigh),
         % bottom row, plot scale on x axis
         fontsize = 10;
         ft_plot_text( ix.*1.2-0.5,iy.*1.2-0.5,num2str(data.freq(1  ),3),'HorizontalAlignment','Center','VerticalAlignment','top','Fontsize',fontsize,'Interpreter','none');
         ft_plot_text( ix.*1.2+0.5,iy.*1.2-0.5,num2str(data.freq(end),3),'HorizontalAlignment','Center','VerticalAlignment','top','Fontsize',fontsize,'Interpreter','none');
       end
-    end
   end
 end
 

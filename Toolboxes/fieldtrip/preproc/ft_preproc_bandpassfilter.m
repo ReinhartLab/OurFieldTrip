@@ -90,7 +90,7 @@ if nargin<6 || isempty(dir)
     dir = 'onepass-zerophase';
   else
     dir = 'twopass';
-  end
+  end 
 end
 
 % set the default method to deal with filter instabilities

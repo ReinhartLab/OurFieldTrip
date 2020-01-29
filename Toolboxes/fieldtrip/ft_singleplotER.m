@@ -346,13 +346,13 @@ end
 
 % Handle the bivariate case
 dimord = getdimord(varargin{1}, cfg.parameter);
-if startsWith(dimord, 'chan_chan_') || startsWith(dimord, 'chancmb_')
-  % convert the bivariate data to univariate and call this plotting function again
-  cfg.originalfunction = 'ft_singleplotER';
-  cfg.trials = 'all'; % trial selection has been taken care off
-  bivariate_common(cfg, varargin{:});
-  return
-end
+% if startsWith(dimord, 'chan_chan_') || startsWith(dimord, 'chancmb_')
+%   % convert the bivariate data to univariate and call this plotting function again
+%   cfg.originalfunction = 'ft_singleplotER';
+%   cfg.trials = 'all'; % trial selection has been taken care off
+%   bivariate_common(cfg, varargin{:});
+%   return
+% end
 
 % Apply channel-type specific scaling
 tmpcfg = keepfields(cfg, {'parameter', 'chanscale', 'ecgscale', 'eegscale', 'emgscale', 'eogscale', 'gradscale', 'magscale', 'megscale', 'mychan', 'mychanscale'});

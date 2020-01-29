@@ -172,6 +172,7 @@ cfg.channel           = ft_getopt(cfg, 'channel',          'all');
 cfg.refchannel        = ft_getopt(cfg, 'refchannel',        []);
 cfg.figurename        = ft_getopt(cfg, 'figurename',        []);
 cfg.interpolatenan    = ft_getopt(cfg, 'interpolatenan',   'yes');
+cfg.masktype          = ft_getopt(cfg, 'masktype',         'transparent');
 
 % default commentpos
 if isempty(cfg.commentpos)
@@ -683,7 +684,8 @@ if ~strcmp(cfg.style, 'blank')
     'isolines',     cfg.contournum, ...
     'mask',         cfg.layout.mask, ...
     'style',        style, ...
-    'datmask',      msk};
+    'datmask',      msk ...
+    'masktype'      cfg.masktype};
   if strcmp(style, 'imsat') || strcmp(style, 'imsatiso')
     % add clim to opt
     opt = [opt {'clim', [zmin zmax], 'ncolors',ncolors}];

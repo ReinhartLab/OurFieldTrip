@@ -170,6 +170,7 @@ if ~isfield(cfg, 'dftfilter'),    cfg.dftfilter = 'no';         end
 if ~isfield(cfg, 'lpfilter'),     cfg.lpfilter = 'no';          end
 if ~isfield(cfg, 'hpfilter'),     cfg.hpfilter = 'no';          end
 if ~isfield(cfg, 'bpfilter'),     cfg.bpfilter = 'no';          end
+if ~isfield(cfg, 'bpfilter2'),     cfg.bpfilter2 = 'no';          end
 if ~isfield(cfg, 'bsfilter'),     cfg.bsfilter = 'no';          end
 if ~isfield(cfg, 'lpfiltord'),    cfg.lpfiltord = [];           end
 if ~isfield(cfg, 'hpfiltord'),    cfg.hpfiltord = [];           end
@@ -318,10 +319,12 @@ else
     dat = ft_preproc_polyremoval(dat, 0, begsample, endsample);
   end
   
+
   if strcmp(cfg.medianfilter, 'yes'), dat = ft_preproc_medianfilter(dat, cfg.medianfiltord); end
   if strcmp(cfg.lpfilter, 'yes'),     dat = ft_preproc_lowpassfilter(dat, fsample, cfg.lpfreq, cfg.lpfiltord, cfg.lpfilttype, cfg.lpfiltdir, cfg.lpinstabilityfix, cfg.lpfiltdf, cfg.lpfiltwintype, cfg.lpfiltdev, cfg.plotfiltresp, cfg.usefftfilt); end
   if strcmp(cfg.hpfilter, 'yes'),     dat = ft_preproc_highpassfilter(dat, fsample, cfg.hpfreq, cfg.hpfiltord, cfg.hpfilttype, cfg.hpfiltdir, cfg.hpinstabilityfix, cfg.hpfiltdf, cfg.hpfiltwintype, cfg.hpfiltdev, cfg.plotfiltresp, cfg.usefftfilt); end
   if strcmp(cfg.bpfilter, 'yes'),     dat = ft_preproc_bandpassfilter(dat, fsample, cfg.bpfreq, cfg.bpfiltord, cfg.bpfilttype, cfg.bpfiltdir, cfg.bpinstabilityfix, cfg.bpfiltdf, cfg.bpfiltwintype, cfg.bpfiltdev, cfg.plotfiltresp, cfg.usefftfilt); end
+  if strcmp(cfg.bpfilter2, 'yes'),    dat = ft_preproc_bandpassfilter2(dat, fsample, cfg.bpfreq, cfg.bpfiltord, cfg.bpfilttype, cfg.bpfiltdir, cfg.bpinstabilityfix, cfg.bpfiltdf, cfg.bpfiltwintype, cfg.bpfiltdev, cfg.plotfiltresp, cfg.usefftfilt, cfg.transition_width); end
   if strcmp(cfg.bsfilter, 'yes')
     for i=1:size(cfg.bsfreq,1)
       % apply a bandstop filter for each of the specified bands, i.e. cfg.bsfreq should be Nx2

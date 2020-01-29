@@ -1896,7 +1896,7 @@ elseif any(strcmp(cfg.viewmode, {'component', 'vertical'}))
   end
   for i = 1:length(chanindx)
     if strcmp(cfg.viewmode, 'component')
-      color = 'k';
+       color = opt.chancolors(chanindx(i),:);
     else
       color = opt.chancolors(chanindx(i),:);
     end

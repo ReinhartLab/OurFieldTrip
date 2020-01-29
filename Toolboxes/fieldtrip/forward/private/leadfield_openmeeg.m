@@ -105,7 +105,8 @@ ecog = ft_getopt(vol,'ecog','no');
 if isfield(vol,'basefile')
     basefile = vol.basefile;
 else
-    basefile = tempname;
+    [a,b] = fileparts(tempname);
+    basefile = b;
 end
 if isfield(vol,'path')
     path = vol.path;

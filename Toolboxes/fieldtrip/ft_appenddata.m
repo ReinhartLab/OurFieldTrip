@@ -250,13 +250,24 @@ elseif cattrial
   data.time   = {};
   if hassampleinfo, data.sampleinfo = []; end
   if hastrialinfo,  data.trialinfo  = []; end;
-
+%   if isfield(varargin{1},'postart') 
+%       data.postart.locks = [];
+%       data.postart.events = [];
+%       data.postart.trlnum = [];
+%   end
+  
   for i=1:Ndata
     data.trial    = cat(2, data.trial,  varargin{i}.trial(:)');
     data.time     = cat(2, data.time,   varargin{i}.time(:)');
+    
+    
+    
     % check if all datasets to merge have the sampleinfo field
     if hassampleinfo, data.sampleinfo = cat(1, data.sampleinfo, varargin{i}.sampleinfo); end
     if hastrialinfo,  data.trialinfo  = cat(1, data.trialinfo,  varargin{i}.trialinfo);  end
+%     if isfield(varargin{1},'postart'), data.postart.locks = cat(1, data.postart.locks,  varargin{i}.postart.locks);  end
+%     if isfield(varargin{1},'postart'), data.postart.events = cat(1, data.postart.events,  varargin{i}.postart.events);  end
+%     if isfield(varargin{1},'postart'), data.postart.trlnum = cat(1, data.postart.trlnum,  varargin{i}.postart.trlnum);  end
     % FIXME is not entirely robust if the different inputs have different number of columns in trialinfo
   end
 

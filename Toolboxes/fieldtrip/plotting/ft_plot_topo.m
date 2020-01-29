@@ -190,10 +190,11 @@ if ~isempty(datmask)
   yi           = linspace(vlim(1), vlim(2), gridscale);   % y-axis for interpolation (row vector)
   maskimagetmp = griddata(chanX', chanY, double(datmask), xi', yi, 'nearest'); % interpolate the mask data
   if isempty(maskimage)
-    maskimage = maskimagetmp;
+  maskimage = maskimagetmp;
   else
-    %maskimage = (maskimage + maskimagetmp) > 1.01;
-    maskimage = (maskimage .* maskimagetmp);
+  maskimage = (maskimage + maskimagetmp) > 1.01;
+  maskimage = (maskimage .* maskimagetmp); % commented out 12/28/19
+  %-john
   end
 end
 
@@ -333,6 +334,10 @@ end
 % Plot filled contours
 if strcmp(style, 'isofill') && ~isempty(isolines)
   [cont, h] = contourf(Xi, Yi, Zi, isolines, 'k');
+  h.LineColor = 'none';
+  h.UserData = h.ZData;
+  maskimage(~logical(round(maskimage))) = nan;
+  h.ZData = h.ZData.*maskimage;
   set(h, 'tag', tag);
   if ~isempty(parent)
     set(h, 'Parent', parent);

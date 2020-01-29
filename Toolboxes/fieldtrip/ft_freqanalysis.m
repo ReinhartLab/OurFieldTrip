@@ -355,7 +355,7 @@ if strcmp(cfg.output, 'fourier')
   cfg.keeptrials = ft_getopt(cfg, 'keeptrials', 'yes');
   cfg.keeptapers = ft_getopt(cfg, 'keeptapers', 'yes');
   if strcmp(cfg.keeptrials, 'no') || strcmp(cfg.keeptapers, 'no')
-%    ft_error('cfg.output = ''fourier'' requires cfg.keeptrials = ''yes'' and cfg.keeptapers = ''yes''');
+    ft_error('cfg.output = ''fourier'' requires cfg.keeptrials = ''yes'' and cfg.keeptapers = ''yes''');
   end
 else
   cfg.keeptrials = ft_getopt(cfg, 'keeptrials', 'no');
@@ -812,7 +812,7 @@ for itrial = 1:ntrials
         conj(spectrum(cutdatindcmb(:,2),:,:));
     end
     
-    if itcflag
+    if itcflg
         itcspctrm(currrptind,:,:) = spectrum/abs(spectrum);
     end
 
@@ -930,7 +930,9 @@ if isfield(data, 'trialinfo') && strcmp(cfg.keeptrials, 'yes')
   freq.trialinfo = data.trialinfo;
 end
 
+if length(oldfoi) == length(freq.freq)
 freq.freq = oldfoi;
+end
 
 % do the general cleanup and bookkeeping at the end of the function
 ft_postamble debug
