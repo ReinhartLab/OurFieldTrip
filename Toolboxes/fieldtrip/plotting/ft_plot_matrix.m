@@ -79,7 +79,7 @@ highlight      = ft_getopt(varargin, 'highlight');
 highlightstyle = ft_getopt(varargin, 'highlightstyle', 'opacity');
 box            = ft_getopt(varargin, 'box',            false);
 tag            = ft_getopt(varargin, 'tag',            '');
-imagetype      = ft_getopt(varargin, 'imagetype',      'imagesc');
+imagetype      = ft_getopt(varargin, 'imagetype',      'straight');
 
 if ~isempty(highlight) && ~isequal(size(highlight), size(cdat))
   error('the dimensions of the highlight should be identical to the dimensions of the data');
@@ -242,7 +242,7 @@ vdat = vdat + vpos;
 if isempty(highlight)
     
     switch imagetype
-        case 'imagesc'
+        case 'straight'
             h = uimagesc(hdat, vdat, cdat, clim);
         case 'contourf'
             [~, h] = contourf(hdat, vdat, cdat, 15);
