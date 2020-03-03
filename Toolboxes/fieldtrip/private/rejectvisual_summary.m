@@ -411,7 +411,7 @@ info = guidata(h);
 rawchans = get(h, 'string');
 
 if strcmpi(rawchans, 'eye channels')
-    rawchans = strjoin(info.cfg.eog);
+    rawchans = strjoin(info.cfg.eog(ismember(info.cfg.eog,info.data.label)));
 end
 
 if ~isempty(rawchans)
