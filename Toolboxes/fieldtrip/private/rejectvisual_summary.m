@@ -117,6 +117,7 @@ info.badchantxt = uicontrol(h, 'Units', 'normalized', 'position', [0.795 0.300 0
 info.output_box = uicontrol(h, 'Units', 'normalized', 'position', [0.00 0.00 1.00 0.15], 'Style', 'edit', 'HorizontalAlignment', 'left', 'Max', 3, 'Min', 1, 'Enable', 'inactive', 'FontName', get(0, 'FixedWidthFontName'), 'FontSize', 9, 'ForegroundColor', [0 0 0], 'BackgroundColor', [1 1 1]);
 
 % quit button
+uicontrol(h, 'Units', 'normalized', 'position', [0.80 0.275 0.10 0.05], 'string', 'eye channels', 'callback', @toggle_channels);
 uicontrol(h, 'Units', 'normalized', 'position', [0.80 0.175 0.10 0.05], 'string', 'quit', 'callback', @quit);
 
 guidata(h, info);
@@ -135,7 +136,9 @@ while interactive && ishandle(h)
   info = guidata(h);
   if info.quit == 0
     uiwait(h);
-  else
+  end
+  
+  if info.quit || ~isvalid(h)
     chansel = info.chansel;
     trlsel  = info.trlsel;
     cfg     = info.cfg;
@@ -406,6 +409,11 @@ uiresume;
 function toggle_channels(h, eventdata)
 info = guidata(h);
 rawchans = get(h, 'string');
+
+if strcmpi(rawchans, 'eye channels')
+    rawchans = strjoin(info.cfg.eog(ismember(info.cfg.eog,info.data.label)));
+end
+
 if ~isempty(rawchans)
   splchans = regexp(rawchans, '\s+', 'split');
   chans = zeros(1, length(splchans));

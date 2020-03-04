@@ -274,7 +274,7 @@ switch highlightstyle
     for i=1:length(begsample)
       begx = hdat(begsample(i));
       endx = hdat(endsample(i));
-      ft_plot_box([begx endx vpos-height/2 vpos+height/2], 'facecolor', [.6 .6 .6], 'edgecolor', 'none', 'parent', parent);
+      ft_plot_box([begx endx vpos-height/2 vpos+height/2], 'facecolor', [.6 0 0], 'edgecolor', 'none', 'parent', parent);
     end
     
   case 'thickness'
@@ -295,7 +295,7 @@ switch highlightstyle
           plot(hor,ver,'linewidth',4*linewidth,'linestyle','-','Color', color); % changed 3* to 4*, as 3* appeared to have no effect
         else
           % plot each line with its own color
-          plot(hor,ver,'linewidth',4*linewidth,'linestyle','-','Color', color(j)); % changed 3* to 4*, as 3* appeared to have no effect
+          plot(hor,ver,'linewidth',4*linewidth,'linestyle','-','Color', color(j,:)); % changed 3* to 4*, as 3* appeared to have no effect
         end
         
       end
@@ -318,7 +318,7 @@ switch highlightstyle
         h = plot(hdat, vdat, style, 'LineWidth', linewidth, 'Color', color, 'markersize', markersize, 'markerfacecolor', markerfacecolor);
       else
         % plot each line with its own color
-        h = plot(hdat, vdat(i,:), style, 'LineWidth', linewidth, 'Color', color(i), 'markersize', markersize, 'markerfacecolor', markerfacecolor);
+        h = plot(hdat, vdat(i,:), style, 'LineWidth', linewidth, 'Color', color(i,:), 'markersize', markersize, 'markerfacecolor', markerfacecolor);
       end
       if ~isempty(parent)
         set(h, 'Parent', parent);
