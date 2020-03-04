@@ -1488,7 +1488,7 @@ switch key
   case 'c'
     % select channels
     select = match_str(opt.hdr.label, cfg.channel);
-    select = select_channel_list(opt.hdr.label, select);
+    select = select_channel_list(cellfun(@(c)c(10:end), opt.hdr.label, 'un',0), select);
     cfg.channel = opt.hdr.label(select);
     opt.changedchanflg = true; % trigger for redrawing channel labels and preparing layout again (see bug 2065 and 2878)
     setappdata(h, 'opt', opt);

@@ -361,7 +361,7 @@ hold on
 
 zval = nanmean(datamatrix, 1); % over channels
 zval = reshape(zval, size(zval,2), size(zval,3));
-mask = squeeze(mean(maskmatrix, 1)); % over channels
+mask = permute(mean(maskmatrix, 1), [2 3 1]); % over channels
 
 % Get physical z-axis range (color axis):
 if strcmp(cfg.zlim, 'maxmin')
