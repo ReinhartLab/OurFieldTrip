@@ -192,7 +192,7 @@ if ~isempty(datmask)
 
 tempmsk = datmask;
 
-if length(size(tempmsk)) > 3
+if length(size(tempmsk))  >= 3
     dim = 4;
 else
     dim = 3;
@@ -200,7 +200,7 @@ end
 
 for eachmsk = 1:size(datmask,dim)
     
-    if length(size(tempmsk)) > 3
+    if length(size(tempmsk)) >= 3
         datmask = tempmsk(:,:,:,eachmsk);
     else
         datmask = tempmsk(:,:,eachmsk);
