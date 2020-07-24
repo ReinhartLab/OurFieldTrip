@@ -160,7 +160,7 @@ switch cfg.method
         
     case  'mi'
         % modulation index
-        nbin       = 20; % number of phase bin
+        nbin       = 21; % number of phase bin
         pacdatas   = zeros(ntrial,nchan,numel(LF),numel(HF),nbin) ;
         for  i =1:nchan
             chandataLF = freqlow.fourierspctrm(:,i,:,:);
@@ -168,7 +168,9 @@ switch cfg.method
             for j = 1:ntrial
                 pacdatas(j,i,:,:,:) = data2pac(squeeze(chandataLF(j,:,:,:)),squeeze(chandataHF(j,:,:,:)),nbin);
             end
+
         end
+        pacdatas = pacdatas(:,:,:,:,1:20);
         cfcdata = pacdatas;
         cfcdata = cfcdata(:,:,:,:,1:nbin-1);
     case 'erpac'
@@ -228,7 +230,7 @@ switch cfg.method
             crsspctrm = zeros(ntrial,nchan,nlf,nhf);
             for k =1:ntrial
                 for n=1:nchan
-                    pac = squeeze(cfcdata(k,n,:,:,:));
+                    pac = permute(cfcdata(k,n,:,:,:),[3 4 5 1 2]);
                     Q =ones(nbin,1)/nbin;                             % uniform distribution
                     mi = zeros(nlf,nhf);
                     
@@ -247,10 +249,10 @@ switch cfg.method
         else
             dimord = 'chan_freqlow_freqhigh' ;
             crsspctrm = zeros(nchan,nlf,nhf);
-            cfcdatamean = permute(mean(cfcdata,1),[2 3 4 5 1]);
+            cfcdatamean = permute(mean(cfcdata,1), [2 3 4 5 1]);
             
             for k =1:nchan
-                pac = permute(cfcdatamean(k,:,:,:),[2 3 4 1]);
+                pac = permute(cfcdatamean(k,:,:,:), [2 3 4 1]);
                 Q =ones(nbin,1)/nbin;                             % uniform distribution
                 mi = zeros(nlf,nhf);
                 
