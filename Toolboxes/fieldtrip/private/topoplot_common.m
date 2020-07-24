@@ -486,6 +486,10 @@ zdim = setdiff(1:ndims(dat), [ydim xdim]);
 % and permute
 dat = permute(dat, [zdim(:)' ydim xdim]);
 
+if length(size(dat)) == 2 && size(dat,2) == length(sellab)
+   dat = dat'; 
+end
+
 if ~isempty(yparam)
   % time-frequency data
   dat = dat(sellab, sely, selx);
@@ -502,23 +506,33 @@ dat = dat(:);
 if isfield(data, cfg.maskparameter)
   % Make mask vector with one value for each channel
   msk = data.(cfg.maskparameter);
-  % get dimord dimensions
-  ydim = find(strcmp(yparam, dimtok));
-  xdim = find(strcmp(xparam, dimtok));
-  zdim = setdiff(1:ndims(dat), [ydim xdim]);
-  % and permute
-  msk = permute(msk, [zdim(:)' ydim xdim]);
   
-  if ~isempty(yparam)
-    % time-frequency data
-    msk = msk(sellab, sely, selx);
-  elseif ~isempty(cfg.component)
-    % component data, nothing to do
-  else
-    % time or frequency data
-    msk = msk(sellab, selx);
+  tempmsk = msk;
+  
+  if length(size(msk)) > 3
+      for eachmsk = 1:size(msk,4)
+          msk = tempmsk(:,:,:,eachmsk);
+          % get dimord dimensions
+          ydim = find(strcmp(yparam, dimtok));
+          xdim = find(strcmp(xparam, dimtok));
+          zdim = setdiff(1:ndims(dat), [ydim xdim]);
+          % and permute
+          msk = permute(msk, [zdim(:)' ydim xdim]);
+          
+          if ~isempty(yparam)
+              % time-frequency data
+              msk = msk(sellab, sely, selx);
+          elseif ~isempty(cfg.component)
+              % component data, nothing to do
+          else
+              % time or frequency data
+              msk = msk(sellab, selx);
+          end
+          
+          tempmsk(:,:,:,eachmsk) = msk;
+      end
   end
-  
+  msk = tempmsk;
 %   if size(msk,2)>1 || size(msk,3)>1
 %     ft_warning('no masking possible for average over multiple latencies or frequencies -> cfg.maskparameter cleared')
 %     msk = [];
@@ -536,7 +550,9 @@ end
 
 dat = dat(seldat);
 if ~isempty(msk)
-  msk = msk(seldat);
+    if length(size(msk)) > 3
+        msk = msk(seldat,1,1,:);
+    end
 end
 
 % Select x and y coordinates and labels of the channels in the data

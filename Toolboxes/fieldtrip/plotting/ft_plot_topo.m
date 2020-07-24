@@ -188,14 +188,39 @@ end
 if ~isempty(datmask)
   xi           = linspace(hlim(1), hlim(2), gridscale);   % x-axis for interpolation (row vector)
   yi           = linspace(vlim(1), vlim(2), gridscale);   % y-axis for interpolation (row vector)
-  maskimagetmp = griddata(chanX', chanY, double(datmask), xi', yi, 'nearest'); % interpolate the mask data
-  if isempty(maskimage)
-  maskimage = maskimagetmp;
-  else
-  maskimage = (maskimage + maskimagetmp) > 1.01;
-  maskimage = (maskimage .* maskimagetmp); % commented out 12/28/19
-  %-john
-  end
+  
+
+tempmsk = datmask;
+
+if length(size(tempmsk)) > 3
+    dim = 4;
+else
+    dim = 3;
+end
+
+for eachmsk = 1:size(datmask,dim)
+    
+    if length(size(tempmsk)) > 3
+        datmask = tempmsk(:,:,:,eachmsk);
+    else
+        datmask = tempmsk(:,:,eachmsk);
+    end
+    
+    
+    maskimagetmp = griddata(chanX', chanY, double(datmask), xi', yi, 'nearest'); % interpolate the mask data
+    if isempty(maskimage)
+        maskimage = maskimagetmp;
+    else
+        maskimage = (maskimage + maskimagetmp) > 1.01;
+        maskimage = (maskimage .* maskimagetmp); % commented out 12/28/19
+        %-john
+    end
+    
+   outmaskimage(:,:,eachmsk) = maskimage;
+end
+maskimage = outmaskimage;
+      
+
 end
 
 % take out NaN channels if interpmethod does not work with NaNs
@@ -239,7 +264,7 @@ if ~isempty(maskimage)
   %maskimage      = maskimage~=0;
   % apply mask to the data to hide parts of the interpolated data (outside the circle) and channels that were specified to be masked
   % this combines the input options mask and maskdat
-  Zi(~maskimage) = NaN;
+  Zi(~maskimage(:,:,1)) = NaN;
 end
 
 % The topography should be plotted prior to the isolines to ensure that it is exported correctly, see http://bugzilla.fcdonders.nl/show_bug.cgi?id=2496
@@ -335,9 +360,12 @@ end
 if strcmp(style, 'isofill') && ~isempty(isolines)
   [cont, h] = contourf(Xi, Yi, Zi, isolines, 'k');
   h.LineColor = 'none';
-  h.UserData = h.ZData;
+  
   maskimage(~logical(round(maskimage))) = nan;
-  h.ZData = h.ZData.*maskimage;
+  
+  h.UserData = cat(3,h.ZData,h.ZData .* maskimage);
+  
+  h.ZData = h.ZData .* maskimage(:,:,1);
   set(h, 'tag', tag);
   if ~isempty(parent)
     set(h, 'Parent', parent);

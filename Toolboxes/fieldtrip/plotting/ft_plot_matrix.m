@@ -275,7 +275,12 @@ if ~isempty(highlight)
                 h.LineColor = 'none';     
                 h.UserData = h.ZData;
                 highlight(~logical(round(highlight))) = nan;
-                h.ZData = h.ZData.*highlight;
+
+                h.UserData = cat(3,h.ZData,h.ZData .* highlight);
+                
+                h.ZData = h.ZData .* highlight(:,:,1);
+                
+
         end
     case 'saturation'
       % This approach changes the color of pixels to white, regardless of colormap, without using opengl

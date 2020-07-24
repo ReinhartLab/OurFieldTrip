@@ -168,5 +168,5 @@ if strcmp(cfg.computeprob,'yes')
   if cfg.tail==1
     scaledstat = ((nunits-ncontrasts)./((nunits-1).*ncontrasts)).*s.stat;
     s.prob = 1-fcdf(scaledstat,s.dfnum,s.dfdenom);
-  end;
+  end; 
 end

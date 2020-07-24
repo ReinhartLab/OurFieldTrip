@@ -235,6 +235,9 @@ if strcmp(cfg.correctm, 'cluster')
     if isfield(cfg, 'contrastcoefs'), tmpcfg.contrastcoefs = cfg.contrastcoefs; end % needed for Erics F-test statfun
     tmpcfg.computecritval = 'yes';  % explicitly request the computation of the crtitical value
     tmpcfg.computestat    = 'no';   % skip the computation of the statistic
+    
+    
+    
     try
       cfg.clustercritval    = getfield(statfun(tmpcfg, dat, design), 'critval');
     catch
@@ -286,7 +289,7 @@ fprintf('estimated time per randomization is %.2f seconds\n', time_eval);
 
 % pre-allocate some memory
 if strcmp(cfg.correctm, 'cluster')
-  statrand = zeros(size(statobs,1), size(resample,1));
+  statrand = zeros(size(statobs,1), size(resample,1), size(statobs,2));
 else
   prb_pos   = zeros(size(statobs));
   prb_neg   = zeros(size(statobs));
@@ -315,9 +318,9 @@ for i=1:Nrand
     % keep each randomization in memory for cluster postprocessing
     dum = statfun(cfg, tmpdat, tmpdesign);
     if isstruct(dum)
-      statrand(:,i) = dum.stat;
+      statrand(:,i,:) = dum.stat;
     else
-      statrand(:,i) = dum;
+      statrand(:,i,:) = dum;
     end
   else
     % do not keep each randomization in memory, but process them on the fly
@@ -344,7 +347,20 @@ ft_progress('close');
 
 if strcmp(cfg.correctm, 'cluster')
   % do the cluster postprocessing
-  [stat, cfg] = clusterstat(cfg, statrand, statobs);
+ 
+  sfg = cfg;
+  tempcfg = cfg;
+  for eachstat = 1:size(statobs,2)
+  
+   tempcfg.clustercritval = sfg.clustercritval;
+   tempstatobs = statobs(:,eachstat);
+   tempstatrand = statrand(:,:,eachstat);
+  
+  [tempstat{eachstat}, cfg] = clusterstat(tempcfg, tempstatrand, tempstatobs);
+  end
+  
+  
+  
 else
   if ~isequal(cfg.numrandomization, 'all')
     % in case of random permutations (i.e., montecarlo sample, and NOT full
@@ -353,19 +369,25 @@ else
     prb_neg = prb_neg + 1;
     Nrand = Nrand + 1;
   end
-  switch cfg.tail
-    case 1
-      clear prb_neg  % not needed any more, free some memory
-      stat.prob = prb_pos./Nrand;
-    case -1
-      clear prb_pos  % not needed any more, free some memory
-      stat.prob = prb_neg./Nrand;
-    case 0
-      % for each observation select the tail that corresponds with the lowest probability
-      prb_neg = prb_neg./Nrand;
-      prb_pos = prb_pos./Nrand;
-      stat.prob = min(prb_neg, prb_pos); % this is the probability for the most unlikely tail
-  end
+  
+  
+      
+      switch cfg.tail
+          case 1
+              clear prb_neg  % not needed any more, free some memory
+              stat.prob = prb_pos./Nrand;
+          case -1
+              clear prb_pos  % not needed any more, free some memory
+              stat.prob = prb_neg./Nrand;
+          case 0
+              % for each observation select the tail that corresponds with the lowest probability
+              prb_neg = prb_neg./Nrand;
+              prb_pos = prb_pos./Nrand;
+              stat.prob = min(prb_neg, prb_pos); % this is the probability for the most unlikely tail
+      end
+      for eachstat = 1:size(statobs,2)
+          tempstat{eachstat}.prob = stat.prob(:,eachstat);
+      end
 end
 
 % In case of a two tailed test, the type-I error rate (alpha) refers to
@@ -385,115 +407,124 @@ end
 % it results in a p-value that corresponds with a parametric probability.
 % Below both options are realized
 if strcmp(cfg.correcttail, 'prob') && cfg.tail==0
-  stat.prob = stat.prob .* 2;
-  stat.prob(stat.prob>1) = 1; % clip at p=1
-  % also correct the probabilities in the pos/negcluster fields
-  if isfield(stat, 'posclusters')
-    for i=1:length(stat.posclusters)
-      stat.posclusters(i).prob = stat.posclusters(i).prob*2;
-      if stat.posclusters(i).prob>1; stat.posclusters(i).prob = 1; end
+    stat.prob = stat.prob .* 2;
+    stat.prob(stat.prob>1) = 1; % clip at p=1
+    % also correct the probabilities in the pos/negcluster fields
+    if isfield(stat, 'posclusters')
+        for i=1:length(stat.posclusters)
+            stat.posclusters(i).prob = stat.posclusters(i).prob*2;
+            if stat.posclusters(i).prob>1; stat.posclusters(i).prob = 1; end
+        end
     end
-  end
-  if isfield(stat, 'negclusters')
-    for i=1:length(stat.negclusters)
-      stat.negclusters(i).prob = stat.negclusters(i).prob*2;
-      if stat.negclusters(i).prob>1; stat.negclusters(i).prob = 1; end
+    if isfield(stat, 'negclusters')
+        for i=1:length(stat.negclusters)
+            stat.negclusters(i).prob = stat.negclusters(i).prob*2;
+            if stat.negclusters(i).prob>1; stat.negclusters(i).prob = 1; end
+        end
     end
-  end
 elseif strcmp(cfg.correcttail, 'alpha') && cfg.tail==0
-  cfg.alpha = cfg.alpha / 2;
+    cfg.alpha = cfg.alpha / 2;
 end
 
-% compute range of confidence interval p ? 1.96(sqrt(var(p))), with var(p) = var(x/n) = p*(1-p)/N
-stddev = sqrt(stat.prob.*(1-stat.prob)/Nrand);
-stat.cirange = 1.96*stddev;
-
-if isfield(stat, 'posclusters')
-  for i=1:length(stat.posclusters)
-    stat.posclusters(i).stddev  = sqrt(stat.posclusters(i).prob.*(1-stat.posclusters(i).prob)/Nrand);
-    stat.posclusters(i).cirange =  1.96*stat.posclusters(i).stddev;
-    if i==1 && stat.posclusters(i).prob<cfg.alpha && stat.posclusters(i).prob+stat.posclusters(i).cirange>=cfg.alpha
-      warning('FieldTrip:posCluster_exceeds_alpha', sprintf('The p-value confidence interval of positive cluster #%i includes %.3f - consider increasing the number of permutations!', i, cfg.alpha));
+for eachstat = 1:length(tempstat)
+    
+    stat = tempstat{eachstat};
+    
+    % compute range of confidence interval p ? 1.96(sqrt(var(p))), with var(p) = var(x/n) = p*(1-p)/N
+    stddev = sqrt(stat.prob.*(1-stat.prob)/Nrand);
+    stat.cirange = 1.96*stddev;
+    
+    if isfield(stat, 'posclusters')
+        for i=1:length(stat.posclusters)
+            stat.posclusters(i).stddev  = sqrt(stat.posclusters(i).prob.*(1-stat.posclusters(i).prob)/Nrand);
+            stat.posclusters(i).cirange =  1.96*stat.posclusters(i).stddev;
+            if i==1 && stat.posclusters(i).prob<cfg.alpha && stat.posclusters(i).prob+stat.posclusters(i).cirange>=cfg.alpha
+                warning('FieldTrip:posCluster_exceeds_alpha', sprintf('The p-value confidence interval of positive cluster #%i includes %.3f - consider increasing the number of permutations!', i, cfg.alpha));
+            end
+        end
     end
-  end
-end
-if isfield(stat, 'negclusters')
-  for i=1:length(stat.negclusters)
-    stat.negclusters(i).stddev  = sqrt(stat.negclusters(i).prob.*(1-stat.negclusters(i).prob)/Nrand);
-    stat.negclusters(i).cirange =  1.96*stat.negclusters(i).stddev;
-    if i==1 && stat.negclusters(i).prob<cfg.alpha && stat.negclusters(i).prob+stat.negclusters(i).cirange>=cfg.alpha
-      warning('FieldTrip:negCluster_exceeds_alpha', sprintf('The p-value confidence interval of negative cluster #%i includes %.3f - consider increasing the number of permutations!', i, cfg.alpha));
+    if isfield(stat, 'negclusters')
+        for i=1:length(stat.negclusters)
+            stat.negclusters(i).stddev  = sqrt(stat.negclusters(i).prob.*(1-stat.negclusters(i).prob)/Nrand);
+            stat.negclusters(i).cirange =  1.96*stat.negclusters(i).stddev;
+            if i==1 && stat.negclusters(i).prob<cfg.alpha && stat.negclusters(i).prob+stat.negclusters(i).cirange>=cfg.alpha
+                warning('FieldTrip:negCluster_exceeds_alpha', sprintf('The p-value confidence interval of negative cluster #%i includes %.3f - consider increasing the number of permutations!', i, cfg.alpha));
+            end
+        end
     end
-  end
+    
+    if ~isfield(stat, 'prob')
+        warning('probability was not computed');
+    else
+        switch lower(cfg.correctm)
+            case 'max'
+                % the correction is implicit in the method
+                fprintf('using a maximum-statistic based method for multiple comparison correction\n');
+                fprintf('the returned probabilities and the thresholded mask are corrected for multiple comparisons\n');
+                stat.mask = stat.prob<=cfg.alpha;
+                stat.posdistribution = posdistribution;
+                stat.negdistribution = negdistribution;
+            case 'cluster'
+                % the correction is implicit in the method
+                fprintf('using a cluster-based method for multiple comparison correction\n');
+                fprintf('the returned probabilities and the thresholded mask are corrected for multiple comparisons\n');
+                stat.mask = stat.prob<=cfg.alpha;
+            case 'bonferroni'
+                fprintf('performing Bonferroni correction for multiple comparisons\n');
+                fprintf('the returned probabilities are uncorrected, the thresholded mask is corrected\n');
+                stat.mask = stat.prob<=(cfg.alpha ./ numel(stat.prob));
+            case 'holm'
+                % test the most significatt significance probability against alpha/N, the second largest against alpha/(N-1), etc.
+                fprintf('performing Holm-Bonferroni correction for multiple comparisons\n');
+                fprintf('the returned probabilities are uncorrected, the thresholded mask is corrected\n');
+                [pvals, indx] = sort(stat.prob(:));                                   % this sorts the significance probabilities from smallest to largest
+                k = find(pvals > (cfg.alpha ./ ((length(pvals):-1:1)')), 1, 'first'); % compare each significance probability against its individual threshold
+                mask = (1:length(pvals))'<k;
+                stat.mask = zeros(size(stat.prob));
+                stat.mask(indx) = mask;
+            case 'hochberg'
+                % test the most significant significance probability against alpha/N, the second largest against alpha/(N-1), etc.
+                fprintf('performing Hochberg''s correction for multiple comparisons (this is *not* the Benjamini-Hochberg FDR procedure!)\n');
+                fprintf('the returned probabilities are uncorrected, the thresholded mask is corrected\n');
+                [pvals, indx] = sort(stat.prob(:));                     % this sorts the significance probabilities from smallest to largest
+                k = find(pvals <= (cfg.alpha ./ ((length(pvals):-1:1)')), 1, 'last'); % compare each significance probability against its individual threshold
+                mask = (1:length(pvals))'<=k;
+                stat.mask = zeros(size(stat.prob));
+                stat.mask(indx) = mask;
+            case 'fdr'
+                fprintf('performing FDR correction for multiple comparisons\n');
+                fprintf('the returned probabilities are uncorrected, the thresholded mask is corrected\n');
+                stat.mask = fdr(stat.prob, cfg.alpha);
+            otherwise
+                fprintf('not performing a correction for multiple comparisons\n');
+                stat.mask = stat.prob<=cfg.alpha;
+        end
+    end
+    
+    % return the observed statistic
+    if ~isfield(stat, 'stat')
+        stat.stat = statobs(:,eachstat);
+    end
+    
+    if exist('statrand', 'var'),
+        stat.ref = mean(statrand,2);
+    end
+    
+    % return optional other details that were returned by the statfun
+    fn = fieldnames(statfull);
+    for i=1:length(fn)
+        if ~isfield(stat, fn{i})
+            stat = setfield(stat, fn{i}, getfield(statfull, fn{i}));
+        end
+    end
+    
+    ft_postamble randomseed; % deal with the potential user specified randomseed
+    
+    warning(ws); % revert to original state
+    
+    tempstat{eachstat} = stat;
 end
 
-if ~isfield(stat, 'prob')
-  warning('probability was not computed');
-else
-  switch lower(cfg.correctm)
-    case 'max'
-      % the correction is implicit in the method
-      fprintf('using a maximum-statistic based method for multiple comparison correction\n');
-      fprintf('the returned probabilities and the thresholded mask are corrected for multiple comparisons\n');
-      stat.mask = stat.prob<=cfg.alpha;
-      stat.posdistribution = posdistribution;
-      stat.negdistribution = negdistribution;
-    case 'cluster'
-      % the correction is implicit in the method
-      fprintf('using a cluster-based method for multiple comparison correction\n');
-      fprintf('the returned probabilities and the thresholded mask are corrected for multiple comparisons\n');
-      stat.mask = stat.prob<=cfg.alpha;
-    case 'bonferroni'
-      fprintf('performing Bonferroni correction for multiple comparisons\n');
-      fprintf('the returned probabilities are uncorrected, the thresholded mask is corrected\n');
-      stat.mask = stat.prob<=(cfg.alpha ./ numel(stat.prob));
-    case 'holm'
-      % test the most significatt significance probability against alpha/N, the second largest against alpha/(N-1), etc.
-      fprintf('performing Holm-Bonferroni correction for multiple comparisons\n');
-      fprintf('the returned probabilities are uncorrected, the thresholded mask is corrected\n');
-      [pvals, indx] = sort(stat.prob(:));                                   % this sorts the significance probabilities from smallest to largest
-      k = find(pvals > (cfg.alpha ./ ((length(pvals):-1:1)')), 1, 'first'); % compare each significance probability against its individual threshold
-      mask = (1:length(pvals))'<k;
-      stat.mask = zeros(size(stat.prob));
-      stat.mask(indx) = mask;
-    case 'hochberg'
-      % test the most significant significance probability against alpha/N, the second largest against alpha/(N-1), etc.
-      fprintf('performing Hochberg''s correction for multiple comparisons (this is *not* the Benjamini-Hochberg FDR procedure!)\n');
-      fprintf('the returned probabilities are uncorrected, the thresholded mask is corrected\n');
-      [pvals, indx] = sort(stat.prob(:));                     % this sorts the significance probabilities from smallest to largest
-      k = find(pvals <= (cfg.alpha ./ ((length(pvals):-1:1)')), 1, 'last'); % compare each significance probability against its individual threshold
-      mask = (1:length(pvals))'<=k;
-      stat.mask = zeros(size(stat.prob));
-      stat.mask(indx) = mask;
-    case 'fdr'
-      fprintf('performing FDR correction for multiple comparisons\n');
-      fprintf('the returned probabilities are uncorrected, the thresholded mask is corrected\n');
-      stat.mask = fdr(stat.prob, cfg.alpha);
-    otherwise
-      fprintf('not performing a correction for multiple comparisons\n');
-      stat.mask = stat.prob<=cfg.alpha;
-  end
-end
-
-% return the observed statistic
-if ~isfield(stat, 'stat')
-  stat.stat = statobs;
-end
-
-if exist('statrand', 'var'),
-  stat.ref = mean(statrand,2);
-end
-
-% return optional other details that were returned by the statfun
-fn = fieldnames(statfull);
-for i=1:length(fn)
-  if ~isfield(stat, fn{i})
-    stat = setfield(stat, fn{i}, getfield(statfull, fn{i}));
-  end
-end
-
-ft_postamble randomseed; % deal with the potential user specified randomseed
-
-warning(ws); % revert to original state
+stat = tempstat;
 
 

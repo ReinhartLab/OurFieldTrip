@@ -86,16 +86,6 @@ freqhigh = ft_checkdata(freqhigh, 'datatype', 'freq', 'feedback', 'yes');
 % but nevertheless did not support between-channel CFC computations
 cfg = ft_checkconfig(cfg, 'forbidden', {'chanlow', 'chanhigh'});
 
-% this function only support CFC computations within channels, not between channels
-if isfield(cfg, 'chanlow') && isfield(cfg, 'chanhigh')
-    if isequal(cfg.chanlow, cfg.chanhigh)
-        cfg.channel = cfg.chanlow;
-        cfg = removefields(cfg, 'chanlow', 'chanhigh');
-    else
-        ft_error('cross-channel CFC not supported, the channel selection should be the same for low and high frequencies')
-    end
-end
-
 cfg.channel    = ft_getopt(cfg, 'channel',  'all');
 cfg.freqlow    = ft_getopt(cfg, 'freqlow',  'all');
 cfg.freqhigh   = ft_getopt(cfg, 'freqhigh', 'all');
@@ -110,7 +100,7 @@ tmpcfg.channel   = cfg.channel;
 tmpcfg.frequency = cfg.freqlow;
 freqlow = ft_selectdata(tmpcfg, freqlow);
 [tmpcfg, freqlow] = rollback_provenance(cfg, freqlow);
-try, cfg.chanlow = tmpcfg.channel;   end
+try, cfg.channel = tmpcfg.channel;   end
 try, cfg.freqlow = tmpcfg.frequency; end
 
 % make selection of frequencies and channels
@@ -119,15 +109,14 @@ tmpcfg.channel   = cfg.channel;
 tmpcfg.frequency = cfg.freqhigh;
 freqhigh = ft_selectdata(tmpcfg, freqhigh);
 [tmpcfg, freqhigh] = rollback_provenance(cfg, freqhigh);
-try, cfg.chanhigh = tmpcfg.channel;   end
+try, cfg.channel  = tmpcfg.channel;   end
 try, cfg.freqhigh = tmpcfg.frequency; end
 
 LF = freqlow.freq;
 HF = freqhigh.freq;
 ntrial = size(freqlow.fourierspctrm,1); % FIXME the dimord might be different
 nchan  = size(freqlow.fourierspctrm,2); % FIXME the dimord might be different
-ntime  = size(freqlow.fourierspctrm,4); % FIXME the dimord might be different
-
+ntime = size(freqlow.fourierspctrm,4);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % prepare the data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -152,7 +141,7 @@ switch cfg.method
             chandataLF = freqlow.fourierspctrm(:,i,:,:);
             chandataHF = freqhigh.fourierspctrm(:,i,:,:);
             for j = 1:ntrial
-                plvdatas(j,i,:,:) = data2plv(permute(chandataLF(j,:,:,:),[2 3 4 1]),permute(chandataHF(j,:,:,:),[2 3 4 1]));
+                plvdatas(j,i,:,:) = data2plv(squeeze(chandataLF(j,:,:,:)),squeeze(chandataHF(j,:,:,:)));
             end
         end
         cfcdata = plvdatas;
@@ -181,23 +170,14 @@ switch cfg.method
             end
         end
         cfcdata = pacdatas;
-    case 'cs_cl'
-        pacdatas   = zeros(2,nchan,ntime) ;
+        cfcdata = cfcdata(:,:,:,:,1:nbin-1);
+    case 'erpac'
+        pacdatas  = zeros(nchan,numel(LF),numel(HF),ntime);
         for  i =1:nchan
-            chandataLF = circ_ang2rad(circ_mean(angle(freqlow.fourierspctrm(:,i,:,:)),[],3));
-            chandataHF =  mean(abs(freqhigh.fourierspctrm(:,i,:,:)),3);
-             for j = 1:ntime
-                [pacdatas(1,i,j) pacdatas(2,i,j)] = circ_corrcl(squeeze(chandataLF(:,:,:,j)),squeeze(chandataHF(:,:,:,j)));
-             end
-        end
-        cfcdata = pacdatas;
-    case 'cs_cc'
-         pacdatas   = zeros(2,nchan,ntime) ;
-        for  i =1:nchan
-            chandataLF = circ_ang2rad(circ_mean(angle(freqlow.fourierspctrm(:,i,:,:)),[],3));
-            chandataHF = circ_ang2rad(circ_mean(angle(freqhigh.fourierspctrm(:,i,:,:)),[],3));
-             for j = 1:ntime
-               [pacdatas(1,i,j) pacdatas(2,i,j)] = circ_corrcc(squeeze(chandataLF(j,:,:,:)),squeeze(chandataHF(j,:,:,:)));
+            chandataLF = freqlow.fourierspctrm(:,i,:,:);
+            chandataHF =  freqhigh.fourierspctrm(:,i,:,:);
+            for j = 1:ntime
+                pacdatas(i,:,:,j) = data2cscl(squeeze(chandataLF(:,:,:,j)),squeeze(chandataHF(:,:,:,j)));
             end
         end
         cfcdata = pacdatas;
@@ -267,10 +247,10 @@ switch cfg.method
         else
             dimord = 'chan_freqlow_freqhigh' ;
             crsspctrm = zeros(nchan,nlf,nhf);
-            cfcdatamean = squeeze(mean(cfcdata,1));
+            cfcdatamean = permute(mean(cfcdata,1),[2 3 4 5 1]);
             
             for k =1:nchan
-                pac = squeeze(cfcdatamean(k,:,:,:));
+                pac = permute(cfcdatamean(k,:,:,:),[2 3 4 1]);
                 Q =ones(nbin,1)/nbin;                             % uniform distribution
                 mi = zeros(nlf,nhf);
                 
@@ -285,10 +265,13 @@ switch cfg.method
             end
             
         end % if keeptrials
-        
+    case 'erpac'
+        dimord = 'chan_freqlow_freqhigh_time' ;
+        crsspctrm = pacdatas;
+        crossfreq.time = freqlow.time;
 end % switch method for actual computation
 
-crossfreq.label      = cfg.chanlow;
+crossfreq.label      = cfg.channel;
 crossfreq.crsspctrm  = crsspctrm;
 crossfreq.dimord     = dimord;
 crossfreq.freqlow    = LF;
@@ -342,7 +325,7 @@ function [plvdata] = data2plv(LFsigtemp,HFsigtemp)
 LFphas   = angle(LFsigtemp);
 HFamp    = abs(HFsigtemp);
 HFamp(isnan(HFamp(:))) = 0;                              % replace nan with 0
-HFphas   = angle(hilbert(HFamp(:)'))';
+HFphas   = angle(hilbert(HFamp'))';
 plvdata  = zeros(size(LFsigtemp,1),size(HFsigtemp,1));   % phase locking value
 
 for i = 1:size(LFsigtemp,1)
@@ -383,7 +366,7 @@ pacdata = zeros(size(LFsigtemp,1),size(HFsigtemp,1),nbin);
 
 Ang  = angle(LFsigtemp);
 Amp  = abs(HFsigtemp);
-[~,bin] = histc(Ang, linspace(-pi,pi,nbin));  % binned low frequency phase
+[dum,bin] = histc(Ang, linspace(-pi,pi,nbin));  % binned low frequency phase
 binamp = zeros (size(HFsigtemp,1),nbin);      % binned amplitude
 
 for i = 1:size(Ang,1)
@@ -400,14 +383,11 @@ function [cscldata] = data2cscl(LFsigtemp,HFsigtemp)
 
 LFphas   = angle(LFsigtemp);
 HFamp    = abs(HFsigtemp);
-cscldata  = zeros(size(LFsigtemp,1),size(HFsigtemp,1));    % mean vector length
+cscldata  = zeros(size(LFsigtemp,2),size(HFsigtemp,2));    % mean vector length
 
-for i = 1:size(LFsigtemp,1)
-    for j = 1:size(HFsigtemp,1)
-        cscldata(i,j) = circ_corrcl(HFamp(j,:),LFphas(i,:));
+for i = 1:size(LFsigtemp,2)
+    for j = 1:size(HFsigtemp,2)
+        cscldata(i,j) = circ_corrcl(HFamp(:,j),LFphas(:,i));
     end
 end
-end
-
-function data2cscs
 end
