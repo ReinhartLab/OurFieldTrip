@@ -79,7 +79,9 @@ highlight      = ft_getopt(varargin, 'highlight');
 highlightstyle = ft_getopt(varargin, 'highlightstyle', 'opacity');
 box            = ft_getopt(varargin, 'box',            false);
 tag            = ft_getopt(varargin, 'tag',            '');
-imagetype      = ft_getopt(varargin, 'imagetype',      'straight');
+imagetype      = ft_getopt(varargin, 'imagetype',      'imagesc');
+colormaps      = ft_getopt(varargin, 'colormap',      'jet');
+colorbars      = ft_getopt(varargin, 'colorbar',      'no');
 
 if ~isempty(highlight) && ~isequal(size(highlight), size(cdat))
   error('the dimensions of the highlight should be identical to the dimensions of the data');
@@ -242,9 +244,11 @@ vdat = vdat + vpos;
 if isempty(highlight)
     
     switch imagetype
-        case 'straight'
+        case 'imagesc'
+            a =  gca;
             h = uimagesc(hdat, vdat, cdat, clim);
         case 'contourf'
+            a =  gca;
             [~, h] = contourf(hdat, vdat, cdat, 15);
             h.LineColor = 'none';
     end
@@ -258,6 +262,8 @@ if ~isempty(highlight)
         
         switch imagetype
             case 'imagesc'
+                
+                a =  gca;
                 % get the same scaling for 'highlight' then what we will get for cdata
                 h = uimagesc(hdat, vdat, highlight);
                 highlight = get(h, 'CData');
@@ -271,14 +277,38 @@ if ~isempty(highlight)
                 end
                 
             case 'contourf'
+                a =  gca;
+                a.UserData = 1;
                 [~, h] = contourf(hdat, vdat, cdat, 15);
                 h.LineColor = 'none';     
                 h.UserData = h.ZData;
-                highlight(~logical(round(highlight))) = nan;
+ %               highlight(~logical(round(highlight))) = nan;
 
-                h.UserData = cat(3,h.ZData,h.ZData .* highlight);
+%                 h.UserData = cat(3,h.ZData,h.ZData .* highlight);
+%                 
+%                 h.ZData = h.ZData .* highlight(:,:,1);
+%                 
+                b= axes;
                 
-                h.ZData = h.ZData .* highlight(:,:,1);
+                t_cdat = cdat;
+                t_cdat(highlight == 1) = nan;
+                
+                [~, h] = contourf(hdat, vdat, t_cdat, 15);
+                h.LineColor = 'none';    
+                linkaxes([a b]);
+                
+                linkprop([a b],'Title');
+                linkprop([b a],'Title');
+                linkprop([b a],'YLabel');
+                linkprop([b a],'XLabel');
+                
+                b.CLim = a.CLim;
+                %b.Position = a.Position;
+                b.UserData = 2;
+                
+                b.Visible = 'off';
+                b.Title.Visible = 'on';
+                axes(a);
                 
 
         end
@@ -347,5 +377,39 @@ if box
   boxposition(4) = vpos + height/2;
   ft_plot_box(boxposition);
 end
+
+% set colormap
+
+
+if ~isnumeric(colormaps)
+    colormaps = colormap(colormaps);
+end
+
+if size(colormaps,2)~=3
+    ft_error('colormap must be a Nx3 matrix');
+end
+
+colormap(a,colormaps);
+
+if isequal(colorbars, 'yes')
+  % tag the colorbar so we know which axes are colorbars
+  l = colorbar(a,'EastOutside','tag', 'ft-colorbar');
+end
+
+if isvarname('b')
+    colormap(b,[1 - .4*(1-colormaps)]);
+    axes(b);
+    
+    if isequal(colorbars, 'yes')
+        % tag the colorbar so we know which axes are colorbars
+        k = colorbar(b,'tag', 'ft-colorbar');
+        k.Visible = 'off';
+        linkprop([l k],'Position');
+    end
+    linkprop([a b],'Position');
+    axes(a);
+end
+
+
 
 warning(ws); % revert to original state

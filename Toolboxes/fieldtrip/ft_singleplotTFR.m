@@ -385,30 +385,19 @@ end
 if isequal(cfg.masknans, 'yes') && isempty(cfg.maskparameter)
   nans_mask = ~isnan(zval);
   mask = double(nans_mask);
-  ft_plot_matrix(xval, yval, zval, 'clim', [zmin zmax], 'tag', 'cip', 'highlightstyle', cfg.maskstyle, 'highlight', mask, 'imagetype', cfg.imagetype)
+  ft_plot_matrix(xval, yval, zval, 'clim', [zmin zmax], 'tag', 'cip', 'highlightstyle', cfg.maskstyle, 'highlight', mask, 'imagetype', cfg.imagetype, 'colormap',cfg.colormap, 'colorbar',cfg.colorbar)
 elseif isequal(cfg.masknans, 'yes') && ~isempty(cfg.maskparameter)
   nans_mask = ~isnan(zval);
   mask = mask .* nans_mask;
   mask = double(mask);
-  ft_plot_matrix(xval, yval, zval, 'clim', [zmin zmax], 'tag', 'cip', 'highlightstyle', cfg.maskstyle, 'highlight', mask, 'imagetype', cfg.imagetype)
+  ft_plot_matrix(xval, yval, zval, 'clim', [zmin zmax], 'tag', 'cip', 'highlightstyle', cfg.maskstyle, 'highlight', mask, 'imagetype', cfg.imagetype , 'colormap',cfg.colormap, 'colorbar',cfg.colorbar)
 elseif isequal(cfg.masknans, 'no') && ~isempty(cfg.maskparameter)
   mask = double(mask);
-  ft_plot_matrix(xval, yval, zval, 'clim', [zmin zmax], 'tag', 'cip', 'highlightstyle', cfg.maskstyle, 'highlight', mask, 'imagetype', cfg.imagetype)
+  ft_plot_matrix(xval, yval, zval, 'clim', [zmin zmax], 'tag', 'cip', 'highlightstyle', cfg.maskstyle, 'highlight', mask, 'imagetype', cfg.imagetype , 'colormap',cfg.colormap, 'colorbar',cfg.colorbar)
 else
-  ft_plot_matrix(xval, yval, zval, 'clim', [zmin zmax], 'tag', 'cip', 'imagetype', cfg.imagetype)
+  ft_plot_matrix(xval, yval, zval, 'clim', [zmin zmax], 'tag', 'cip', 'imagetype', cfg.imagetype , 'colormap',cfg.colormap)
 end
 
-% set colormap
-if isfield(cfg, 'colormap')
-  if ~isnumeric(cfg.colormap)
-    cfg.colormap = colormap(cfg.colormap);
-  end
-  if size(cfg.colormap,2)~=3
-    ft_error('colormap must be a Nx3 matrix');
-  else
-    set(gcf, 'colormap', cfg.colormap);
-  end
-end
 
 % Set renderer if specified
 if ~isempty(cfg.renderer)
@@ -416,11 +405,6 @@ if ~isempty(cfg.renderer)
 end
 
 axis xy
-
-if isequal(cfg.colorbar, 'yes')
-  % tag the colorbar so we know which axes are colorbars
-  colorbar('tag', 'ft-colorbar');
-end
 
 % Set callback to adjust color axis
 if strcmp('yes', cfg.hotkeys)
@@ -456,7 +440,7 @@ if isempty(get(gcf, 'Name'))
   end
 end
 
-axis tight
+%axis tight
 hold off
 
 % Make the figure interactive
@@ -489,10 +473,13 @@ ft_postamble trackconfig
 ft_postamble previous data
 ft_postamble provenance
 
+
 if ~nargout
   % don't return anything
   clear cfg
 end
+
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
