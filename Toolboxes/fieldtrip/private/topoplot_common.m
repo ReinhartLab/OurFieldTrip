@@ -243,18 +243,18 @@ if strcmp(cfg.marker, 'highlights')
 end
 
 % check colormap is proper format and set it
-if isfield(cfg, 'colormap')
-  if ~isnumeric(cfg.colormap)
-    cfg.colormap = colormap(cfg.colormap);
-  end
-  if size(cfg.colormap,2)~=3
-    ft_error('cfg.colormap must be Nx3');
-  end
-  colormap(cfg.colormap);
-  ncolors = size(cfg.colormap,1);
-else
-  ncolors = []; % let the low-level function deal with this
-end
+% if isfield(cfg, 'colormap')
+%   if ~isnumeric(cfg.colormap)
+%     cfg.colormap = colormap(cfg.colormap);
+%   end
+%   if size(cfg.colormap,2)~=3
+%     ft_error('cfg.colormap must be Nx3');
+%   end
+%   colormap(cfg.colormap);
+%   ncolors = size(cfg.colormap,1);
+% else
+%   ncolors = []; % let the low-level function deal with this
+% end
 
 
 %% Section 2: data handling, this also includes converting bivariate (chan_chan and chancmb) into univariate data
@@ -701,7 +701,9 @@ if ~strcmp(cfg.style, 'blank')
     'mask',         cfg.layout.mask, ...
     'style',        style, ...
     'datmask',      msk ...
-    'masktype'      cfg.masktype};
+    'masktype',     cfg.masktype ...
+    'colormap',     cfg.colormap ...
+    'colorbar',     cfg.colorbar};
   if strcmp(style, 'imsat') || strcmp(style, 'imsatiso')
     % add clim to opt
     opt = [opt {'clim', [zmin zmax], 'ncolors',ncolors}];
@@ -820,13 +822,13 @@ if ~strcmp(cfg.style, 'blank')
 end
 
 % Plot colorbar
-if isfield(cfg, 'colorbar')
-  if strcmp(cfg.colorbar, 'yes')
-    colorbar;
-  elseif ~strcmp(cfg.colorbar, 'no')
-    colorbar('location', cfg.colorbar);
-  end
-end
+% if isfield(cfg, 'colorbar')
+%   if strcmp(cfg.colorbar, 'yes')
+%     colorbar;
+%   elseif ~strcmp(cfg.colorbar, 'no')
+%     colorbar('location', cfg.colorbar);
+%   end
+% end
 
 % Set renderer if specified
 if ~isempty(cfg.renderer)

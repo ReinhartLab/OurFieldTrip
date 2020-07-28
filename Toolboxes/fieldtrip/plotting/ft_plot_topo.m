@@ -71,6 +71,9 @@ outline       = ft_getopt(varargin, 'outline');
 clim          = ft_getopt(varargin, 'clim', []);
 parent        = ft_getopt(varargin, 'parent', []);
 
+colorbars        = ft_getopt(varargin, 'colorbar', 'no');
+colormaps        = ft_getopt(varargin, 'colormap', 'jet');
+
 % check for nans in the data, they can be still left incase people want to mask non channels.
 if any(isnan(dat))
   warning('the data passed to ft_plot_topo contains NaNs, these channels will be removed from the data to prevent interpolation errors, but will remain in the mask');
@@ -340,6 +343,7 @@ end
 
 % Plot the outline of the head, ears and nose
 for i=1:length(outline)
+  a =  gca;
   xval = outline{i}(:, 1) * xScaling  + hpos;
   yval = outline{i}(:, 2) * yScaling + vpos;
   ft_plot_vector(xval, yval, 'Color', 'k', 'LineWidth', 2, 'tag', tag, 'parent', parent);
@@ -348,6 +352,7 @@ end
 % Create isolines
 if strcmp(style, 'iso') || strcmp(style, 'surfiso') ||  strcmp(style, 'imsatiso')
   if ~isempty(isolines)
+      a =  gca;
     [cont, h] = contour(Xi, Yi, Zi, isolines, 'k');
     set(h, 'tag', tag);
     if ~isempty(parent)
@@ -358,18 +363,31 @@ end
 
 % Plot filled contours
 if strcmp(style, 'isofill') && ~isempty(isolines)
-  [cont, h] = contourf(Xi, Yi, Zi, isolines, 'k');
-  h.LineColor = 'none';
-  
-  maskimage(~logical(round(maskimage))) = nan;
-  
-  h.UserData = cat(3,h.ZData,h.ZData .* maskimage);
-  
-  h.ZData = h.ZData .* maskimage(:,:,1);
-  set(h, 'tag', tag);
-  if ~isempty(parent)
-    set(h, 'Parent', parent);
-  end
+    
+    a =  gca;
+    a.UserData = 1;
+    [cont, h] = contourf(Xi, Yi, Zi, isolines, 'k');
+    h.LineColor = 'none';
+    
+    %     maskimage(~logical(round(maskimage))) = nan;
+    %     h.UserData = cat(3,h.ZData,h.ZData .* maskimage);
+    %     h.ZData = h.ZData .* maskimage(:,:,1);
+    
+    for mk = 1:size(maskimage,3)
+        
+        b(mk)= axes;
+        
+        t_cdat = Zi;
+        t_cdat(maskimage(:,:,mk) == 1) = nan;
+        
+        [~, h] = contourf(Xi, Yi, t_cdat, isolines);
+        h.LineColor = 'none';
+    end
+    
+    %set(h, 'tag', tag);
+%   if ~isempty(parent)
+%     set(h, 'Parent', parent);
+%   end
 end
 
 % apply clim if it was given
@@ -384,5 +402,67 @@ previous_argin     = current_argin;
 if ~holdflag
   hold off
 end
+drawnow;
+
+if ~isnumeric(colormaps)
+    colormaps = colormap(colormaps);
+end
+
+if size(colormaps,2)~=3
+    ft_error('colormap must be a Nx3 matrix');
+end
+
+colormap(a,colormaps);
+
+if isequal(colorbars, 'yes')
+  % tag the colorbar so we know which axes are colorbars
+  a_pos = a.Position;
+  l = colorbar(a,'EastOutside','tag', 'ft-colorbar');
+  a.Position = a_pos;
+end
+
+if isvarname('b')
+    arrayfun(@(c) colormap(c,[1 - .4*(1-colormaps)]),b);
+    
+    
+    
+    if isequal(colorbars, 'yes')
+        % tag the colorbar so we know which axes are colorbars
+        
+        for mkb = 1:length(b)
+        k = colorbar(b(mkb),'tag', 'ft-colorbar');
+        k.Visible = 'off';
+        k.Position = k.Position + 1e-10;
+        %linkprop([l k],'Position');
+        %l.Position = k.Position;
+        end
+    end
+    
+    
+    
+    linkaxes([a b]);
+    linkprop([a b],'Position');
+    linkprop([a b],'Title');
+    linkprop([b a],'Title');
+
+     for mkb = 1:length(b)
+        b(mkb).CLim = a.CLim;
+        b(mkb).UserData = 1+ mkb;
+        axes(b(mkb));
+        axis equal;
+        
+        
+        b(mkb).Visible = 'off';
+        b(mkb).Title.Visible = 'on';
+     end
+    axes(a);
+end
+
+% if isequal(colorbars, 'yes')
+%   % tag the colorbar so we know which axes are colorbars
+%   l = colorbar(a,'EastOutside','tag', 'ft-colorbar');
+% end
+
+
 
 warning(ws); % revert to original state
