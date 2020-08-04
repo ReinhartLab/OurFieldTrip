@@ -83,9 +83,9 @@ imagetype      = ft_getopt(varargin, 'imagetype',      'imagesc');
 colormaps      = ft_getopt(varargin, 'colormap',      'jet');
 colorbars      = ft_getopt(varargin, 'colorbar',      'no');
 
-if ~isempty(highlight) && ~isequal(size(highlight), size(cdat))
-  error('the dimensions of the highlight should be identical to the dimensions of the data');
-end
+% if ~isempty(highlight) && ~isequal(size(highlight), size(cdat))
+%   error('the dimensions of the highlight should be identical to the dimensions of the data');
+% end
 
 % axis   = ft_getopt(varargin, 'axis', false);
 % label  = ft_getopt(varargin, 'label'); % FIXME
@@ -280,34 +280,41 @@ if ~isempty(highlight)
                 a =  gca;
                 a.UserData = 1;
                 [~, h] = contourf(hdat, vdat, cdat, 15);
-                h.LineColor = 'none';     
+                h.LineColor = 'none';
                 h.UserData = h.ZData;
- %               highlight(~logical(round(highlight))) = nan;
-
-%                 h.UserData = cat(3,h.ZData,h.ZData .* highlight);
-%                 
-%                 h.ZData = h.ZData .* highlight(:,:,1);
-%                 
-                b= axes;
+                %               highlight(~logical(round(highlight))) = nan;
                 
-                t_cdat = cdat;
-                t_cdat(highlight == 1) = nan;
+                %                 h.UserData = cat(3,h.ZData,h.ZData .* highlight);
+                %
+                %                 h.ZData = h.ZData .* highlight(:,:,1);
+                %
                 
-                [~, h] = contourf(hdat, vdat, t_cdat, 15);
-                h.LineColor = 'none';    
+                
+                for mk = 1:size(highlight,3)
+                    
+                    b(mk)= axes;
+                    
+                    t_cdat = cdat;
+                    t_cdat(highlight(:,:,mk) == 1) = nan;
+                 
+                    
+                    [~, h] = contourf(hdat, vdat, t_cdat, 15);
+                    h.LineColor = 'none';
+                    
+                    %b.Position = a.Position;
+                    b(mk).UserData = mk + 1;
+                    
+                    b(mk).Visible = 'off';
+                    b(mk).Title.Visible = 'on';
+                    
+                end
+                
                 linkaxes([a b]);
-                
                 linkprop([a b],'Title');
                 linkprop([b a],'Title');
                 linkprop([b a],'YLabel');
                 linkprop([b a],'XLabel');
-                
-                b.CLim = a.CLim;
-                %b.Position = a.Position;
-                b.UserData = 2;
-                
-                b.Visible = 'off';
-                b.Title.Visible = 'on';
+                 
                 axes(a);
                 
 
@@ -396,16 +403,22 @@ if isequal(colorbars, 'yes')
   l = colorbar(a,'EastOutside','tag', 'ft-colorbar');
 end
 
-if isvarname('b')
-    colormap(b,[1 - .4*(1-colormaps)]);
-    axes(b);
-    
-    if isequal(colorbars, 'yes')
-        % tag the colorbar so we know which axes are colorbars
-        k = colorbar(b,'tag', 'ft-colorbar');
-        k.Visible = 'off';
-        linkprop([l k],'Position');
+if exist('b')
+    for mk = 1:size(highlight,3)
+        
+        colormap(b(mk),[1 - .4*(1-colormaps)]);
+        axes(b(mk));
+        
+        if isequal(colorbars, 'yes')
+            % tag the colorbar so we know which axes are colorbars
+            k = colorbar(b(mk),'tag', 'ft-colorbar');
+            k.Visible = 'off';
+            
+        end
+        k.Position = l.Position;
     end
+    
+    linkprop([l k],'Position');
     linkprop([a b],'Position');
     axes(a);
 end

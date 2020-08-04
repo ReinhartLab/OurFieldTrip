@@ -333,7 +333,7 @@ datamatrix = permute(datamatrix, ib);
 datamatrix = datamatrix(selchan, sely, selx);
 
 if ~isempty(cfg.maskparameter)
-  maskmatrix = data.(cfg.maskparameter)(selchan, sely, selx);
+  maskmatrix = data.(cfg.maskparameter)(selchan, sely, selx,:);
   if islogical(maskmatrix) && any(strcmp(cfg.maskstyle, {'saturation', 'opacity'}))
     maskmatrix = double(maskmatrix);
     maskmatrix(~maskmatrix) = cfg.maskalpha;
@@ -361,7 +361,7 @@ hold on
 
 zval = nanmean(datamatrix, 1); % over channels
 zval = reshape(zval, size(zval,2), size(zval,3));
-mask = permute(mean(maskmatrix, 1), [2 3 1]); % over channels
+mask = permute(mean(maskmatrix, 1), [2 3 4 1]); % over channels
 
 % Get physical z-axis range (color axis):
 if strcmp(cfg.zlim, 'maxmin')
