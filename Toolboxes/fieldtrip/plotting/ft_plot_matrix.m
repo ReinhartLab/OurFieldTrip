@@ -416,6 +416,8 @@ if exist('b')
             
         end
         k.Position = l.Position;
+        
+        b(mk).Title.Visible = 'on';
     end
     
     linkprop([l k],'Position');
