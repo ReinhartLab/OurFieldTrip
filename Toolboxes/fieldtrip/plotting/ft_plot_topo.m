@@ -421,7 +421,7 @@ if isequal(colorbars, 'yes')
   a.Position = a_pos;
 end
 
-if isvarname('b')
+if exist('b')
     arrayfun(@(c) colormap(c,[1 - .4*(1-colormaps)]),b);
     
     
