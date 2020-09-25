@@ -270,11 +270,19 @@ if ~isempty(highlight)
                 delete(h); % this is needed because "hold on" might have been called previously, e.g. in ft_multiplotTFR
                 h = uimagesc(hdat, vdat, cdat, clim);
                 set(h,'tag',tag);
-                if ft_platform_supports('alim')
-                    set(h,'AlphaData',highlight);
-                    set(h, 'AlphaDataMapping', 'scaled');
-                    alim([0 1]);
-                end
+                
+                
+                h.UserData = cat(3,ones(size(highlight(:,:,1))), highlight);
+                
+                c = gca;
+                c.UserData = 1;
+%                 h.ZData = h.ZData .* highlight(:,:,1);
+% 
+%                 if ft_platform_supports('alim')
+%                     set(h,'AlphaData',highlight(:,:,1));
+%                     set(h, 'AlphaDataMapping', 'scaled');
+%                     alim([0 1]);
+%                 end
                 
             case 'contourf'
                 a =  gca;

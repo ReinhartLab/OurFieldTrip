@@ -92,9 +92,9 @@ cfg = ft_checkconfig(cfg, 'forbidden',   {'transform'});
 cfg = ft_checkconfig(cfg, 'forbidden',   {'trials'}); % this used to be present until 24 Dec 2014, but was deemed too confusing by Robert
 
 % check if the input data is valid for this function
-for i=1:length(varargin)
-  varargin{i} = ft_checkdata(varargin{i}, 'datatype', 'freq', 'feedback', 'no');
-end
+% for i=1:length(varargin)
+%   varargin{i} = ft_checkdata(varargin{i}, 'datatype', 'freq', 'feedback', 'no');
+% end
 
 % set the defaults
 cfg.parameter   = ft_getopt(cfg, 'parameter'); % default is set below
