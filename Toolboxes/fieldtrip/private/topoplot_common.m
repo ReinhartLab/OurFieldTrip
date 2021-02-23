@@ -691,6 +691,8 @@ if strcmp(cfg.style, 'straight_imsat');  style = 'imsat';       end
 if strcmp(cfg.style, 'both_imsat');      style = 'imsatiso';    end
 
 % Draw plot
+cfg.colormap        = ft_getopt(cfg, 'colormap', 'jet');
+
 if ~strcmp(cfg.style, 'blank')
   opt = {'interpmethod', cfg.interpolation, ...
     'interplim',    interplimits, ...

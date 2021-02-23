@@ -871,22 +871,11 @@ elseif strcmp(current, 'fourier') && strcmp(desired, 'full')
   % this is how it is currently and the desired functionality of prepare_freq_matrices
   dimtok = tokenize(data.dimord, '_');
   if ~isempty(strmatch('rpttap',   dimtok))
-      if ~all(all(data.cumtapcnt == 1)) %change made by Ben L, 1/29/18, to increase speed
     nrpt = size(data.cumtapcnt, 1);
     flag = 0;
-      else
-          nrpt = 1;
-          flag = 1;
-      end
   else
     nrpt = 1;
     flag = 1;
-  end
-  if ~all(all(data.cumtapcnt == 1)) %change made by Ben L, 1/29/18, to increase speed
-        if ~isempty(strmatch('rpttap',dimtok)), nrpt=size(data.cumtapcnt, 1); else nrpt = 1; end
-  else
-          nrpt = 1;
-          flag = 1;
   end
   if ~isempty(strmatch('freq',  dimtok)), nfrq=length(data.freq);       else nfrq = 1; end
   if ~isempty(strmatch('time',  dimtok)), ntim=length(data.time);       else ntim = 1; end

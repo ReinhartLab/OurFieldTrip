@@ -328,11 +328,18 @@ end
 [g, voxels_in] = import_gain(path, basefile, ft_senstype(sens, 'eeg'));
 if (voxels_in ~= voxels) & (nargout == 1); warning('Imported voxels from OpenMEEG process not the same as function input.'); end;
 
-lp = sens.tra*g; % Mchannels x (3 orientations x Nvoxels)
+if isfield(sens, 'tra')
+    % compute the leadfield for each gradiometer (linear combination of coils)
+    lp = sens.tra * g;
+else
+    lp = g; % Mchannels x (3 orientations x Nvoxels)
+end
+
+
 
 % Cleanup
 if cleanup_flag
-    rmdir(basepath,'s')
+    rmdir(path,'s')
 end
 if (isunix & ~ismac)
     setenv('LD_LIBRARY_PATH',ldLibraryPath0);

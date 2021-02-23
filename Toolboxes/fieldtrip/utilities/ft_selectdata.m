@@ -247,12 +247,12 @@ avgovertime    = istrue(ft_getopt(cfg, 'avgovertime', false));
 avgoverrpt     = istrue(ft_getopt(cfg, 'avgoverrpt',  false));
 
 % do a sanity check for the averaging options
-if avgoverpos,     assert(haspos,     'there are no source positions, so averaging is not possible'); end
-if avgoverchan,    assert(haschan,    'there is no channel dimension, so averaging is not possible'); end
-if avgoverchancmb, assert(haschancmb, 'there are no channel combinations, so averaging is not possible'); end
-if avgoverfreq,    assert(hasfreq,    'there is no frequency dimension, so averaging is not possible'); end
-if avgovertime,    assert(hastime,    'there is no time dimension, so averaging over time is not possible'); end
-if avgoverrpt,     assert(hasrpt||hasrpttap, 'there are no repetitions, so averaging is not possible'); end
+% if avgoverpos,     assert(haspos,     'there are no source positions, so averaging is not possible'); end
+% if avgoverchan,    assert(haschan,    'there is no channel dimension, so averaging is not possible'); end
+% if avgoverchancmb, assert(haschancmb, 'there are no channel combinations, so averaging is not possible'); end
+% if avgoverfreq,    assert(hasfreq,    'there is no frequency dimension, so averaging is not possible'); end
+% if avgovertime,    assert(hastime,    'there is no time dimension, so averaging over time is not possible'); end
+% if avgoverrpt,     assert(hasrpt||hasrpttap, 'there are no repetitions, so averaging is not possible'); end
 
 % set averaging function
 cfg.nanmean = ft_getopt(cfg, 'nanmean', 'no');
