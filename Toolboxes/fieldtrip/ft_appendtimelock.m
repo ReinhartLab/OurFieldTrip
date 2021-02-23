@@ -152,7 +152,7 @@ switch cfg.appenddim
         endchan = chansel(i+1)-1;
         timelock.avg(begchan:endchan,:) = varargin{i}.avg;
         %timelock.var(begchan:endchan,:) = varargin{i}.var;
-        timelock.dof(begchan:endchan,:) = varargin{i}.dof;
+        %timelock.dof(begchan:endchan,:) = varargin{i}.dof;
         timelock.label = [timelock.label; varargin{i}.label(:)];
       end % for varargin
 
