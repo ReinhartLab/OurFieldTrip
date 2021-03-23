@@ -368,7 +368,7 @@ switch highlightstyle
   otherwise
     % plot the actual lines after the highlight box or patch, otherwise those will be on top
     if isempty(color)
-      h = plot(hdat, vdat, style, 'LineWidth', linewidth, 'markersize', markersize, 'markerfacecolor', markerfacecolor);
+      h = plot(hdat, vdat, style{i}, 'LineWidth', linewidth, 'markersize', markersize, 'markerfacecolor', markerfacecolor);
     elseif isequal(color, 'none')
       % do not plot the lines, this is useful in combination with highlightstyle=difference
       h = [];
@@ -377,22 +377,22 @@ switch highlightstyle
       h = plot(hdat, vdat, style, 'LineWidth', linewidth, 'Color', color, 'markersize', markersize, 'markerfacecolor', markerfacecolor);
     elseif isnumeric(color) && isequal(size(color), [1 3])
       % plot all lines with the same RGB color
-      h = plot(hdat, vdat, style, 'LineWidth', linewidth, 'Color', color, 'markersize', markersize, 'markerfacecolor', markerfacecolor);
+      h = plot(hdat, vdat, style{i}, 'LineWidth', linewidth, 'Color', color, 'markersize', markersize, 'markerfacecolor', markerfacecolor);
     elseif ischar(color) && numel(color)==nline
       % plot each line with its own color
       for i=1:size(vdat,1)
-        h = plot(hdat, vdat(i,:), style, 'LineWidth', linewidth, 'Color', color(i), 'markersize', markersize, 'markerfacecolor', markerfacecolor);
+        h = plot(hdat, vdat(i,:), style{i}, 'LineWidth', linewidth, 'Color', color(i), 'markersize', markersize, 'markerfacecolor', markerfacecolor);
       end
     elseif isnumeric(color) && size(color,1)==nline
       % the color is specified as Nx3 matrix with RGB values for each line
       for i=1:size(vdat,1)
-        h = plot(hdat, vdat(i,:), style, 'LineWidth', linewidth, 'Color', color(i,:), 'markersize', markersize, 'markerfacecolor', markerfacecolor);
+        h = plot(hdat, vdat(i,:), style{i}, 'LineWidth', linewidth, 'Color', color(i,:), 'markersize', markersize, 'markerfacecolor', markerfacecolor);
       end
     elseif isnumeric(color) && size(color,1)==npos
       % the color is specified as Nx3 matrix with RGB values and varies over the length of the line
       for i=1:(size(vdat,2)-1)
         for j=1:size(vdat,1)
-          h = plot(hdat(i:i+1), vdat(j,i:i+1), style, 'LineWidth', linewidth, 'Color', mean(color([i i+1],:),1), 'markersize', markersize, 'markerfacecolor', markerfacecolor);
+          h = plot(hdat(i:i+1), vdat(j,i:i+1), style{i}, 'LineWidth', linewidth, 'Color', mean(color([i i+1],:),1), 'markersize', markersize, 'markerfacecolor', markerfacecolor);
         end
       end
     else
