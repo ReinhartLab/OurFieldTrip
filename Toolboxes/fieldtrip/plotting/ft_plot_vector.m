@@ -377,7 +377,7 @@ switch highlightstyle
       h = plot(hdat, vdat, style, 'LineWidth', linewidth, 'Color', color, 'markersize', markersize, 'markerfacecolor', markerfacecolor);
     elseif isnumeric(color) && isequal(size(color), [1 3])
       % plot all lines with the same RGB color
-      h = plot(hdat, vdat, style{i}, 'LineWidth', linewidth, 'Color', color, 'markersize', markersize, 'markerfacecolor', markerfacecolor);
+      h = plot(hdat, vdat, style, 'LineWidth', linewidth, 'Color', color, 'markersize', markersize, 'markerfacecolor', markerfacecolor);
     elseif ischar(color) && numel(color)==nline
       % plot each line with its own color
       for i=1:size(vdat,1)
