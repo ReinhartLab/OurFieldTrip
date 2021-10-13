@@ -186,6 +186,11 @@ if strncmp(tag,'axh',3)
   label  = info.(tag).label(:);  
 else % no subplots were used
   info   = guidata(gcf);
+
+if isstruct(info)
+    f = fields(info);
+    info = info.(f{1});
+end
   x      = info.x(:);
   y      = info.y(:);
   label  = info.label(:);
