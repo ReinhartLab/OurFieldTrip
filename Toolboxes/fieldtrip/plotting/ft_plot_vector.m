@@ -368,7 +368,7 @@ switch highlightstyle
   otherwise
     % plot the actual lines after the highlight box or patch, otherwise those will be on top
     if isempty(color)
-      h = plot(hdat, vdat, style{i}, 'LineWidth', linewidth, 'markersize', markersize, 'markerfacecolor', markerfacecolor);
+      h = plot(hdat, vdat, style, 'LineWidth', linewidth, 'markersize', markersize, 'markerfacecolor', markerfacecolor);
     elseif isequal(color, 'none')
       % do not plot the lines, this is useful in combination with highlightstyle=difference
       h = [];
