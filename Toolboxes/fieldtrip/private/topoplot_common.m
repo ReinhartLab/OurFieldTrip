@@ -938,6 +938,7 @@ end
 % SUBFUNCTION which is called after selecting channels in case of cfg.interactive='yes'
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 function select_singleplotTFR(label)
+display(label)
 ident       = get(gca, 'tag');
 info        = guidata(gcf);
 cfg         = info.(ident).cfg;
