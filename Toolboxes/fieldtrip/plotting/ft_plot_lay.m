@@ -56,6 +56,7 @@ vpos         = ft_getopt(varargin, 'vpos',         0);
 width        = ft_getopt(varargin, 'width',          []);
 height       = ft_getopt(varargin, 'height',         []);
 point        = ft_getopt(varargin, 'point',        true);
+type        = ft_getopt(varargin, 'type',        1);
 box          = ft_getopt(varargin, 'box',          true);
 label        = ft_getopt(varargin, 'label',        true);
 labelsize    = ft_getopt(varargin, 'labelsize',    10);
@@ -143,7 +144,39 @@ Lbl    = lay.label;
 
 if point
   if ~isempty(pointsymbol) && ~isempty(pointcolor) && ~isempty(pointsize) % if they're all non-empty, don't use the default
-    plot(X, Y, 'marker', pointsymbol, 'color', pointcolor, 'markersize', pointsize, 'linestyle', 'none');
+      if type == 1
+      plot(X, Y, 'marker', pointsymbol, 'color', pointcolor, 'markersize', pointsize, 'linestyle', 'none');
+      else type == 2
+      scatter(X,Y,pointsize,pointcolor,'filled');
+      hold all
+      
+      % the MATLAB text function fails if the position for the string is specified in single precision
+      X = double(X);
+      Y = double(Y);
+      
+      % check whether fancy label plotting is needed, this requires a for loop,
+      % otherwise print text in a single shot
+      if numel(labelrotate)==1
+          text(X+labeloffset, Y+(labeloffset*1.5), Lbl , 'fontsize', labelsize, 'fontname', labelfont, 'interpreter', interpreter, 'horizontalalignment', labelalignh, 'verticalalignment', labelalignv, 'color', labelcolor);
+      else
+          n = numel(Lbl);
+          if ~iscell(labelalignh)
+              labelalignh = repmat({labelalignh},[n 1]);
+          end
+          if ~iscell(labelalignv)
+              labelalignv = repmat({labelalignv},[n 1]);
+          end
+          if numel(Lbl)~=numel(labelrotate)||numel(Lbl)~=numel(labelalignh)||numel(Lbl)~=numel(labelalignv)
+              eror('there is something wrong with the input arguments');
+          end
+          for k = 1:numel(Lbl)
+              text(X(k)+labeloffset, Y(k)+(labeloffset*1.5), Lbl{k}, 'fontsize', labelsize, 'fontname', labelfont, 'interpreter', interpreter, 'horizontalalignment', labelalignh{k}, 'verticalalignment', labelalignv{k}, 'rotation', labelrotate(k), 'color', labelcolor);
+          end
+      end
+
+      
+      end
+      
   else
     plot(X, Y, 'marker', '.', 'color', 'b', 'linestyle', 'none');
     plot(X, Y, 'marker', 'o', 'color', 'y', 'linestyle', 'none');
